@@ -71,3 +71,31 @@ falsifiable next experiment, and it is a different construction from `_sandwich_
 N ≤ 216 (6^3), 2 seeds, 40N steps — comparable to the project's own 3D N range; the estimators
 are independent of the project's. The link criterion is calibrated (Freudenthal passes, cube
 fails-as-expected). No fabricated numbers.
+
+## Update — a certified discrete 3-manifold IS constructible (Pachner route)
+
+Following the forward route above, `tooling/construct_3manifold.py` builds a frame-free (no
+coordinates) triangulation by Pachner moves from the boundary of the 4-simplex, and the link
+census CERTIFIES it:
+
+| target N | tets | link sphere | link disk | link bad | verdict | d_s (4-12) |
+|---:|---:|---:|---:|---:|---|---:|
+| 30 | 173 | 30 | 0 | 0 | closed 3-manifold | 1.19 |
+| 60 | 368 | 60 | 0 | 0 | closed 3-manifold | 3.06 |
+| 120 | 718 | 120 | 0 | 0 | closed 3-manifold | 3.50 |
+
+So a genuine discrete 3-manifold (every vertex link a 2-sphere) is achievable — the thing the
+cubic-target `_sandwich_k` route never reached. **But the geometry is degenerate.** These random
+Pachner triangulations sit in the crumpled/branched-polymer phase: the diameter is tiny, ball-
+growth d_H saturates near 0 over any usable window, and the lazy-walk d_s overshoots (3.5 at
+N=120) rather than settling at 3. That is the well-known dynamical-triangulations pathology.
+
+### The honest state of the 3D problem
+Two separable requirements, and each known construction meets only one:
+- `_sandwich_k` (cubic target): right-ish volume growth, WRONG topology (a sponge; links fail).
+- Pachner random triangulation: right topology (certified manifold), WRONG geometry (crumpled).
+Getting BOTH — a certified 3-manifold whose d_s = d_H = 3 — is precisely the problem Causal
+Dynamical Triangulations solves with an Einstein-Hilbert action plus a causal/foliated restriction
+on the moves. The next real experiment is therefore: Pachner-move Monte Carlo with a curvature
+(Regge-action) weight and a causal-slicing constraint, validated jointly by the link census (already
+built) and d_s -> 3. That is a bounded, well-posed target, not open-ended tuning.
