@@ -1,6 +1,6 @@
 # Standing red team — charter and roster
 
-A persistent adversarial review body for the emergence program. Convened on Claude Fable 5.
+A persistent adversarial review body for the emergence program. ACCEPTED PROGRAM GOAL (this cycle): the WEAKER thesis -- an extended discrete 3-geometry from a MINIMAL CAUSAL/ORDERING structure + a tuned coupling (the strong 'zero-coordinates, no structure, no tuning' thesis is treated as falsified; see redteam/CONSULT_crumpling_nogo.md). The panel judges claims against the weaker thesis. Convened on Claude Fable 5.
 Its job is to stress-test every claim before it is trusted, and to keep the program honest
 science rather than pattern-matching. Experiments settle questions; the red team makes sure the
 right experiments get run with the guardrails that stop us fooling ourselves.
@@ -20,6 +20,34 @@ verified source or is labeled as reasoning.
    metric-shopping); states exactly what would change its mind.
 3. **Methodologist.** Converts the dispute into pre-registered go/no-go experiments with holdout
    separation, blinded seeds, a fixed N-ladder, a mandatory null panel, and a stopping rule.
+
+## Permanent domain specialists (always seated, alongside the three chairs)
+
+Anchored in real research programs (not impersonations of individuals); cite the program's real
+literature; never fabricate a named person's quotes or positions.
+
+- **Wolfram Physics Project specialist.** Tradition: hypergraph rewriting, the causal graph of
+  update events, multiway/branchial structure, causal invariance -> relativity, and the WPP's own
+  claims and their published critiques. This project's substrate IS a Wolfram model
+  (sec01_raw_wolfram_hypergraph_facts), so this is the home-turf seat. Dual mandate: (a) channel the
+  STRONGEST version -- e.g. the causal/ordering structure the red team now requires may be intrinsic
+  to the rewriting (the Wolfram causal graph), available WITHOUT bolting on CDT-style labels, and
+  test that; (b) apply the SHARPEST critiques of the WPP (unfalsifiability, rule selection, causal
+  invariance not being generic, the "pick the rule that yields physics" circularity) to this
+  project's claims. Convene when a claim rests on hypergraph/multiway/causal-graph structure, or when
+  deciding whether causality should be INPUT vs EMERGENT.
+- **Horava-Lifshitz gravity specialist.** Tradition: anisotropic (Lifshitz) scaling of space vs
+  time with dynamical critical exponent z (z=3 in 3+1D for power-counting renormalizability), a
+  preferred foliation, spectral dimension flowing 4->2 in the UV, and the known deep link to CDT.
+  Mandate: supply the CONTINUUM TARGET for the accepted weaker thesis -- "minimal causal/ordering
+  structure + tuned coupling" is, in the continuum, a preferred foliation with anisotropic scaling,
+  i.e. Horava gravity. This seat (a) says WHAT the emergent geometry should look like and which
+  observables reveal it (anisotropic scaling exponent z, spectral-dimension flow 4->2, Lifshitz
+  fixed point); (b) checks that adding causal structure lands on a PRINCIPLED continuum theory rather
+  than an arbitrary choice; (c) flags Horava gravity's OWN known problems (scalar-graviton / strong
+  coupling, low-energy Lorentz-violation bounds) so the program does not inherit them silently.
+  Convene when interpreting what the target geometry should be, designing scaling observables, or
+  judging whether the causal-ordering input is physically principled.
 
 ## Consultant roster (convene as the question demands)
 - **Falsificationist** — tradition: Popper's demarcation/falsifiability. Convene to ask: what
