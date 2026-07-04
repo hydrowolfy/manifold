@@ -60,3 +60,33 @@ Sizes N ~ 10^3-10^4, >=10 seeds, blinded, tuning/verdict partition enforced.
 Implement the Lutz-Nevo flag edge-subdivision move + inverse at graph level; grow a certified flag
 3-manifold; add empty-square rejection for the fns arm; wire the existing link census (must stay
 all-2-sphere) and d_s/d_H estimators; run arms B and C. Arm C is the decisive novel experiment.
+
+## Build status (arm B done; arm C obstacle characterized)
+
+`tooling/flag3_manifold.py` — frame-free FLAG 3-manifold generator (Lutz-Nevo edge subdivision,
+graph-only). Certified: the 16-cell seed and all grown configs pass the flag-2-sphere vertex-link
+census (K4-free neighborhood + clique complex a 2-sphere). This is a genuine milestone: a
+frame-free construction that produces CERTIFIED 3-manifolds via a theorem-grade move, with the
+manifold living in the graph itself.
+
+- **Arm B (plain flag), result:** certified flag 3-manifolds at N=40/80 CRUMPLE — d_s 2.27/2.47,
+  d_H 0.22/0.48, empty-square count 672/1810. Confirms with the REAL Lutz-Nevo move (not merely
+  barycentric subdivision) that flag alone does not decrumple. Consistent with Adamaszek-Hladky
+  and the earlier pre-test.
+- **Arm C (flag-no-square) obstacle, precisely located:** the minimal flag seed (16-cell) already
+  has 12 empty squares, and every Lutz-Nevo subdivision INCREASES the square count, so greedy
+  square-minimization stalls at the seed (cannot descend monotonically). Reaching a flag-no-square
+  3-manifold requires going UPHILL in the square energy first — i.e. a Metropolis-annealed MCMC
+  with the INVERSE Lutz-Nevo move (contraction) for fixed-size exploration, and/or a constructed
+  fns seed. The existence/reachability of small fns 3-spheres via a square-rejecting chain is
+  genuinely open (no published fns analog of Lutz-Nevo). This is the next careful build — the
+  "whole ballgame" — and the one place to go slow to avoid a confident wrong answer.
+
+### Next build (staged, precise)
+1. Implement the inverse Lutz-Nevo move (contract a subdivided vertex; recognize by the local
+   neighborhood condition), with certification-rejection.
+2. Metropolis MCMC over flag 3-spheres with energy = empty-square count; anneal toward 0.
+3. If a fns (0-square) 3-manifold is reached at usable N: measure d_s/d_H vs N (arm C = the
+   decisive novel experiment); pre-register the pass gate (d_s,d_H -> 3, gap closing) before runs.
+4. If fns cannot be reached / stays crumpled: that is the clean negative that licenses the
+   locally-causal CDT fallback (Jordan-Loll), honestly.
