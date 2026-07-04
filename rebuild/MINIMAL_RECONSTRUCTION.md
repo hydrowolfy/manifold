@@ -45,3 +45,14 @@ demonstrably → 0 with N; a stable simple boundary across N; d_s and d_H conver
 grids under increasing N and longer runs; and separation from the degree-preserving rewire and
 the null panel on these holdouts. Those are the next steps on this branch. Until they pass and
 the review below signs off, nothing merges to `main`.
+
+## STATUS after review round 2 (panel): THESIS NOT SUPPORTED AS WRITTEN
+
+The 4-reviewer panel (REVIEW_LOG.md, round 2) overturned the thesis above. Extended to N=240 the
+planar route's defect densities RISE, not decay (articulation 0.006→0.028→0.026), d_s does not
+convergently approach the grid (seed-noise-dominated, estimators disagree), and the ablation's
+"planarity holdout" is circular (planarity is the generator's own acceptance gate). The planar
+route remains the *best* object in the project and cleanly beats its degree-preserving rewire,
+but on this evidence it is "a disk-like planar graph with a growing set of pinch points," not a
+proven 2D manifold candidate. The recommendation "return to s1_14" was based on a spot-check that
+did not probe N-scaling — the exact facet that fails. See the consolidated required changes.
