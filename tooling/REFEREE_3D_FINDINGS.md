@@ -99,3 +99,22 @@ Dynamical Triangulations solves with an Einstein-Hilbert action plus a causal/fo
 on the moves. The next real experiment is therefore: Pachner-move Monte Carlo with a curvature
 (Regge-action) weight and a causal-slicing constraint, validated jointly by the link census (already
 built) and d_s -> 3. That is a bounded, well-posed target, not open-ended tuning.
+
+## First CDT data point (Euclidean DT, fixed N0, action sweep)
+
+`tooling/cdt_experiment.py` runs a manifold-preserving 2-3/3-2 Pachner chain at fixed vertex
+count under a Regge weight exp(-k3*dN3), sweeping k3. Every state stays a certified 3-manifold
+(0 bad links). N0=60, 1200 sweeps:
+
+| k3 | tets | manifold ok | d_s (4-12) | d_H (2-6) |
+|---:|---:|:--:|---:|---:|
+| -0.40 | 539 | yes | 2.55 | 0.06 |
+|  0.00 | 382 | yes | 2.58 | 0.15 |
+| +0.40 | 194 | yes | 2.15 | 0.53 |
+| +0.80 | 174 | yes | 2.50 | 0.94 |
+
+Reading: the action moves the geometry and d_s rises to ~2.58 (best), materially closer to 3
+than the cubic sponge or the 2D objects, but d_s and d_H never approach 3 *together* — the dense
+phase crumples (d_H ~ 0) and the thin phase loses d_s. This is the textbook Euclidean-DT phase
+picture: no smooth phase without causality. Next lever (v1): impose a causal/foliated slicing on
+the moves (CDT proper) and re-sweep; the joint gate is link-census-clean AND d_s -> d_H -> 3.
