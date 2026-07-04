@@ -118,3 +118,12 @@ not trivially eliminable at small N with a first-cut annealer.
   nonzero floor that does not decrease with size+effort (the "irreducible defect" signature seen
   elsewhere in the program). This is a real compute study - a good candidate for a bounded,
   checkpointed scheduled run, not a single interactive pass.
+
+## Corrections from the code audit (redteam/CONSULT_flag_artifacts_audit.md)
+- certify() had a false positive (pinched pseudosurfaces passed); FIXED with a local-disk check.
+- Empty-square counts above were 2x too high (counting bug); FIXED. Real arm-C densities ~1-2.5/vertex.
+- d_H numbers are RETRACTED (the estimator reads ~1.0 on a genuine 3-torus). Use d_s vs a matched
+  3D control instead (d_s reads 3.0 on the 3-torus, so it works at these N).
+- anneal_fns is an OPTIMIZER, not equilibrium MCMC - label accordingly.
+- Arm-C FAIL requires the empty-square density to not decrease across INCREASING N, with a known-fns
+  positive control / min-N existence argument (an fns S^3 may not exist at small N).

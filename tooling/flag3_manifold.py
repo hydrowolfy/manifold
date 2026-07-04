@@ -72,7 +72,29 @@ def link_is_flag_2sphere(G, v):
                 seen.add(y); st.append(y)
     if len(seen) != len(verts):
         return False
-    return (len(verts) - Ec + Fc) == 2   # chi == 2  -> sphere
+    # LOCAL-DISK: every vertex's link WITHIN the surface must be a single cycle. Without this,
+    # pinched pseudosurfaces (two spheres sharing vertices) pass chi==2 + edge-in-2-triangles.
+    linkedges = defaultdict(list)
+    for (a, b, c) in tris:
+        linkedges[a].append((b, c)); linkedges[b].append((a, c)); linkedges[c].append((a, b))
+    for u in verts:
+        le = linkedges[u]
+        if not le:
+            return False
+        ldeg = defaultdict(int); ladj = defaultdict(set)
+        for (x, y) in le:
+            ldeg[x] += 1; ldeg[y] += 1; ladj[x].add(y); ladj[y].add(x)
+        if any(d != 2 for d in ldeg.values()):
+            return False
+        lv = list(ldeg); s2 = {lv[0]}; st2 = [lv[0]]
+        while st2:
+            x = st2.pop()
+            for y in ladj[x]:
+                if y not in s2:
+                    s2.add(y); st2.append(y)
+        if len(s2) != len(lv):
+            return False
+    return (len(verts) - Ec + Fc) == 2   # closed surface + local-disk + chi==2 -> genuine 2-sphere
 
 
 def certify(G, verts=None):
@@ -125,7 +147,7 @@ def count_empty_squares(G):
                     if c == a or c in Ga:
                         continue
                     if len({a, b, c, d}) == 4:
-                        seen.add((min(a, c), max(a, c), min(b, d), max(b, d)))
+                        seen.add(tuple(sorted(((min(a, c), max(a, c)), (min(b, d), max(b, d))))))
     return len(seen)
 
 
