@@ -158,3 +158,20 @@ improve with size+annealing without full fns.
 
 Bug fixed this commit: math.exp overflow in the Metropolis accept (crashed at N>=64) -- downhill
 moves now accept unconditionally.
+
+### Resolution of the d_s-rise side observation: it is a crumpled-graph artifact
+Diameter check: plain flag configs have diameter 4 at BOTH N=64 and N=96 (max degree 47 -> 60),
+while a real 3-geometry (cube 4^3) has diameter 9 at N=64 (max degree 6). The flag route is a
+small-world crumple with super-hubs; a low-diameter graph mixes fast and inflates the random-walk
+spectral dimension, so the "d_s -> 3" reading is that artifact, not emergent 3-geometry. The flag
+route is therefore decisively crumpled (arm B) and flag-no-square-unreachable (arm C).
+
+## Flag route: CLOSED. Next route: locally-causal CDT (the licensed fallback)
+The frame-free FLAG route is exhausted: it is the correct frame-free substrate but its geometry
+crumples and cannot be decrumpled by the flag-no-square constraint (empty-square density rises with
+N). Per the pre-registered protocol this licenses the locally-causal CDT fallback: Jordan-Loll
+local causality labels (no global foliation, so the "frame-free" hard core survives as a
+gauge-invariance property), Regge action, with the joint gate = certified manifold (link census)
+AND d_s -> 3 on a NON-crumpled object (diameter must grow with N, unlike the flag crumple) AND
+d_H -> 3 on a matched control-calibrated estimator. Diameter-growth-with-N is added to the gate as
+the crumple guard the flag route would have failed.
