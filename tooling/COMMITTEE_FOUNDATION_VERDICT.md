@@ -68,6 +68,14 @@ result may stand.
 - **E5 — Frame-freeness audit** (only after E4 passes): reconstruct from the unlabeled 1-skeleton;
   decides the "frame-free" headline per the disagreement above.
 
+> **E5 CORRECTED by red-team consult (redteam/CONSULT_E5_frame_freeness.md):** the 1-skeleton
+> does NOT determine a 3-manifold (Dancis threshold is the 2-skeleton; K_9 alone carries 1297
+> triangulations in two homeomorphism types). Replace with (A) vertex-link census on the unlabeled
+> **2-skeleton** + (B) a **gauge-invariance test**: the move rule must descend to the
+> isomorphism quotient and all observables factor through the forgetful map. Graph-only
+> certification is valid only for flag complexes. Frame-freeness is a property of the DYNAMICS,
+> not of a single configuration.
+
 ## Decision
 Freeze the hierarchy above the manifold now. The foundation question reduces to a clean, pre-
 registered go/no-go centered on E4. The current scheduled run (Euclidean DT at larger scale) is
