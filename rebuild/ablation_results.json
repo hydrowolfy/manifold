@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "n": 140,
+    "seeds": [
+      11,
+      1,
+      2
+    ],
+    "steps_per_n": 60
+  },
+  "grid": {
+    "bridges": 0,
+    "lazy_ds": 1.729
+  },
+  "constructions": {
+    "PLANAR (s1_14, step present)": {
+      "per_seed": [
+        {
+          "seed": 11,
+          "planar": true,
+          "E": 312,
+          "bridge_frac": 0.0032,
+          "artic_frac": 0.0071,
+          "bad_link_frac": 0.007142857142857143,
+          "simple_boundary": true,
+          "lazy_ds": 1.5962
+        },
+        {
+          "seed": 1,
+          "planar": true,
+          "E": 307,
+          "bridge_frac": 0.013,
+          "artic_frac": 0.0286,
+          "bad_link_frac": 0.02857142857142857,
+          "simple_boundary": true,
+          "lazy_ds": 1.6526
+        },
+        {
+          "seed": 2,
+          "planar": true,
+          "E": 305,
+          "bridge_frac": 0.0098,
+          "artic_frac": 0.0214,
+          "bad_link_frac": 0.02142857142857143,
+          "simple_boundary": true,
+          "lazy_ds": 1.7177
+        }
+      ],
+      "agg": {
+        "planar_rate": 1.0,
+        "bridge_frac": 0.0087,
+        "artic_frac": 0.019,
+        "bad_link_frac": 0.019,
+        "simple_boundary_rate": 1.0,
+        "lazy_ds": 1.6555
+      }
+    },
+    "EULER-GATE (s1_14, step altered)": {
+      "per_seed": [
+        {
+          "seed": 11,
+          "planar": false,
+          "E": 408,
+          "bridge_frac": 0.0,
+          "artic_frac": 0.0,
+          "bad_link_frac": null,
+          "simple_boundary": null,
+          "lazy_ds": 3.9552
+        },
+        {
+          "seed": 1,
+          "planar": false,
+          "E": 406,
+          "bridge_frac": 0.0,
+          "artic_frac": 0.0,
+          "bad_link_frac": null,
+          "simple_boundary": null,
+          "lazy_ds": 4.0549
+        },
+        {
+          "seed": 2,
+          "planar": false,
+          "E": 405,
+          "bridge_frac": 0.0,
+          "artic_frac": 0.0,
+          "bad_link_frac": null,
+          "simple_boundary": null,
+          "lazy_ds": 3.8993
+        }
+      ],
+      "agg": {
+        "planar_rate": 0.0,
+        "bridge_frac": 0.0,
+        "artic_frac": 0.0,
+        "bad_link_frac": null,
+        "simple_boundary_rate": 0.0,
+        "lazy_ds": 3.9698
+      }
+    },
+    "SANDWICH (s1_22, arc added)": {
+      "per_seed": [
+        {
+          "seed": 11,
+          "planar": true,
+          "E": 221,
+          "bridge_frac": 0.0679,
+          "artic_frac": 0.3429,
+          "bad_link_frac": 0.07857142857142857,
+          "simple_boundary": false,
+          "lazy_ds": 0.8965
+        },
+        {
+          "seed": 1,
+          "planar": true,
+          "E": 233,
+          "bridge_frac": 0.0343,
+          "artic_frac": 0.15,
+          "bad_link_frac": 0.05,
+          "simple_boundary": true,
+          "lazy_ds": 1.2623
+        },
+        {
+          "seed": 2,
+          "planar": true,
+          "E": 228,
+          "bridge_frac": 0.0351,
+          "artic_frac": 0.2214,
+          "bad_link_frac": 0.03571428571428571,
+          "simple_boundary": true,
+          "lazy_ds": 0.9861
+        }
+      ],
+      "agg": {
+        "planar_rate": 1.0,
+        "bridge_frac": 0.0458,
+        "artic_frac": 0.2381,
+        "bad_link_frac": 0.0548,
+        "simple_boundary_rate": 0.6666666666666666,
+        "lazy_ds": 1.0483
+      }
+    }
+  }
+}
