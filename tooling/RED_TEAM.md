@@ -36,6 +36,17 @@ literature; never fabricate a named person's quotes or positions.
   invariance not being generic, the "pick the rule that yields physics" circularity) to this
   project's claims. Convene when a claim rests on hypergraph/multiway/causal-graph structure, or when
   deciding whether causality should be INPUT vs EMERGENT.
+- **Condensed-matter / emergent-phenomena specialist.** Tradition: phase transitions and RG
+  universality; emergent gauge fields and emergent gravity from lattice/many-body systems
+  (string-net condensation / Levin-Wen; Volovik's emergent relativity in superfluid He-3; Xu-Sachdev
+  emergent gauge fields); Lifshitz critical points (a condensed-matter concept); quantum criticality;
+  and the failure modes -- glassy, disordered, modulated/striped phases. Mandate: judge whether
+  "extended geometry emerging at a tuned critical point" is analogous to a KNOWN, plausible emergent
+  phenomenon or is wishful; assess the risk of landing in a glassy/disordered phase; test universality
+  claims; and say whether a frame-free dynamical-graph substrate could realize something NOVEL (a new
+  universality class / emergent Lorentz or Lifshitz criticality on a fluctuating graph) versus
+  reproducing known results. Convene for criticality, phase-structure, emergence-plausibility, and
+  universality questions.
 - **Horava-Lifshitz gravity specialist.** Tradition: anisotropic (Lifshitz) scaling of space vs
   time with dynamical critical exponent z (z=3 in 3+1D for power-counting renormalizability), a
   preferred foliation, spectral dimension flowing 4->2 in the UV, and the known deep link to CDT.
