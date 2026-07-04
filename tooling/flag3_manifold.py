@@ -198,3 +198,90 @@ if __name__ == "__main__":
         G, sq = grow(a.n, seed=a.seed, fns=a.fns)
         print("N=%d M=%d certified=%s emptySquares=%d" %
               (len(G), sum(len(G[x]) for x in G)//2, certify(G), count_empty_squares(G)))
+
+
+# ----------------------------------------------------------- inverse move + fns annealer
+def contract(G, w, u, v):
+    C = G[w] - {u, v}
+    for x in list(G[w]):
+        G[x].discard(w)
+    del G[w]
+    G[u].add(v); G[v].add(u)
+    return C
+
+
+def undo_contract(G, w, u, v, C):
+    G[u].discard(v); G[v].discard(u)
+    G[w] = {u, v} | set(C)
+    G[u].add(w); G[v].add(w)
+    for c in C:
+        G[c].add(w)
+
+
+def _find_contraction(G, w, rng):
+    nb = list(G[w])
+    if len(nb) < 3:
+        return None
+    rng.shuffle(nb)
+    for i in range(len(nb)):
+        for j in range(i + 1, len(nb)):
+            u, v = nb[i], nb[j]
+            if v in G[u]:
+                continue  # need u,v non-adjacent (an inverse edge-subdivision restores uv)
+            C = G[w] - {u, v}
+            if C <= (G[u] & G[v]):
+                return u, v, C
+    return None
+
+
+def anneal_fns(target_n, steps, seed=0, T_hi=1.5, T_lo=0.03):
+    import math
+    rng = random.Random(seed)
+    G, _ = grow(target_n, seed=seed)          # start from a plain (square-full) flag 3-manifold
+    nextw = max(G) + 1
+    E = count_empty_squares(G)
+    E0, best = E, E
+    acc = 0
+    for step in range(steps):
+        T = T_hi * (T_lo / T_hi) ** (step / max(steps - 1, 1))
+        do_sub = len(G) < target_n or (len(G) <= target_n and rng.random() < 0.5)
+        if do_sub:
+            u = rng.choice(list(G))
+            if not G[u]:
+                continue
+            v = rng.choice(list(G[u])); common = G[u] & G[v]
+            aff = subdivide(G, u, v, nextw)
+            if not certify(G, aff):
+                undo_subdivide(G, u, v, nextw, common); continue
+            newE = count_empty_squares(G)
+            if rng.random() < math.exp(-(newE - E) / T):
+                E = newE; nextw += 1; acc += 1
+            else:
+                undo_subdivide(G, u, v, nextw, common)
+        else:
+            w = rng.choice(list(G))
+            f = _find_contraction(G, w, rng)
+            if not f:
+                continue
+            u, v, C = f
+            contract(G, w, u, v)
+            aff = {u, v} | set(C) | (G[u] & G[v])
+            if not certify(G, aff):
+                undo_contract(G, w, u, v, C); continue
+            newE = count_empty_squares(G)
+            if rng.random() < math.exp(-(newE - E) / T):
+                E = newE; acc += 1
+            else:
+                undo_contract(G, w, u, v, C)
+        best = min(best, E)
+    assert certify(G), "annealer left the flag-3-manifold class -- move bug"
+    return G, dict(E0=E0, E_final=E, E_best=best, N=len(G), acc=acc)
+
+
+def anneal_report(target_n, steps, seed=0):
+    G, info = anneal_fns(target_n, steps, seed=seed)
+    ds, dH = _dims(G)
+    tag = "FLAG-NO-SQUARE reached!" if info["E_best"] == 0 else "still has squares"
+    print("anneal N~%d steps=%d seed=%d: emptySquares %d -> final %d (best %d) [%s] | certified=%s | d_s=%s d_H=%s"
+          % (target_n, steps, seed, info["E0"], info["E_final"], info["E_best"], tag, certify(G), ds, dH))
+    return G, info

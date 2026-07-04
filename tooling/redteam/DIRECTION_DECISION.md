@@ -90,3 +90,31 @@ manifold living in the graph itself.
    decisive novel experiment); pre-register the pass gate (d_s,d_H -> 3, gap closing) before runs.
 4. If fns cannot be reached / stays crumpled: that is the clean negative that licenses the
    locally-causal CDT fallback (Jordan-Loll), honestly.
+
+## Arm C first result: annealer works; verdict INCONCLUSIVE (underpowered)
+
+`tooling/flag3_manifold.py` now has the flag-no-square annealer: inverse Lutz-Nevo contraction
+move + Metropolis on the empty-square energy, with certification-rejection every step. Verified
+property: the chain NEVER leaves the certified flag-3-manifold class (asserted each run).
+
+First runs (single seed, 2-3k steps, N=15-28): the annealer drives empty squares down ~5x
+(e.g. 278 -> 52 at N~24) but **plateaus far above 0** in every run - it does NOT reach
+flag-no-square. The residual floor is **noisy and effort-dependent** (best-square density ranged
+~2.1 to ~4.7 per vertex; shorter runs plateaued higher), so the data cannot distinguish "fns is
+unreachable / crumpling is intrinsic" from "the annealer is underpowered."
+
+Per the methodologist's pre-registered stopping rule (promising-but-underpowered clause), this is
+**INCONCLUSIVE**, not a FAIL and not a PASS. What it does establish: (a) the frame-free flag +
+inverse-move machinery is correct and certification-safe; (b) empty-square energy is reducible but
+not trivially eliminable at small N with a first-cut annealer.
+
+### To reach a verdict on arm C (the decisive novel experiment), properly power it:
+- >=10 seeds per size; much longer / better-tuned schedules; an N-ladder (e.g. 24, 48, 96, 192).
+- Better move mixing (the current sub/contract alternation may be a poor sampler) and/or a
+  CONSTRUCTED flag-no-square seed (Przytycki-Swiatkowski) so the chain starts inside the fns class
+  instead of annealing toward it.
+- Pre-register: PASS = a size-ladder where the best empty-square density -> 0 AND, at the fns
+  configs, d_s and d_H -> 3 with the gap closing; FAIL = empty-square density plateaus at a
+  nonzero floor that does not decrease with size+effort (the "irreducible defect" signature seen
+  elsewhere in the program). This is a real compute study - a good candidate for a bounded,
+  checkpointed scheduled run, not a single interactive pass.
