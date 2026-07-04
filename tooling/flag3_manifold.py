@@ -276,7 +276,7 @@ def anneal_fns(target_n, steps, seed=0, T_hi=1.5, T_lo=0.03):
             if not certify(G, aff):
                 undo_subdivide(G, u, v, nextw, common); continue
             newE = count_empty_squares(G)
-            if rng.random() < math.exp(-(newE - E) / T):
+            if newE <= E or rng.random() < math.exp(-(newE - E) / T):
                 E = newE; nextw += 1; acc += 1
             else:
                 undo_subdivide(G, u, v, nextw, common)
@@ -291,7 +291,7 @@ def anneal_fns(target_n, steps, seed=0, T_hi=1.5, T_lo=0.03):
             if not certify(G, aff):
                 undo_contract(G, w, u, v, C); continue
             newE = count_empty_squares(G)
-            if rng.random() < math.exp(-(newE - E) / T):
+            if newE <= E or rng.random() < math.exp(-(newE - E) / T):
                 E = newE; acc += 1
             else:
                 undo_contract(G, w, u, v, C)

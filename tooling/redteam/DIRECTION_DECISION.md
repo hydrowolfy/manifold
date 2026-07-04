@@ -127,3 +127,34 @@ not trivially eliminable at small N with a first-cut annealer.
 - anneal_fns is an OPTIMIZER, not equilibrium MCMC - label accordingly.
 - Arm-C FAIL requires the empty-square density to not decrease across INCREASING N, with a known-fns
   positive control / min-N existence argument (an fns S^3 may not exist at small N).
+
+## Arm C scheduled study result: qualified FAIL (licenses the CDT fallback)
+
+Full pre-registered N-ladder (24/40/64/96, 4 seeds each, 17 chains; corrected code):
+
+| N | best empty-square density (min) | mean +/- sd | fns(0)? | d_s (final config) |
+|---|---:|---:|---|---|
+| 24 | 0.96 | 1.15 +/- 0.20 | no | 1.35-1.76 |
+| 40 | 1.15 | 1.44 +/- 0.29 | no | 2.22-2.37 |
+| 64 | 1.44 | 1.68 +/- 0.27 | no | 2.65-3.28 |
+| 96 | 1.74 | 2.17 +/- 0.44 | no | 2.10-2.61 |
+
+**Verdict: FAIL (qualified).** No chain reached flag-no-square; the best empty-square density does
+NOT decrease with N -- it INCREASES (0.96 -> 1.74), the opposite of the PASS signature, matching the
+irreducible-defect wall seen everywhere else in the program. This licenses the locally-causal CDT
+fallback (Jordan-Loll). Plateau evidence: E_best == E_final in all 17 chains; a +43% longer N=64
+chain did not beat the floor.
+
+Honesty caveats (from the run): steps/node fell ~12x across the ladder (45s/call cap), so the
+*rising* trend at N>=64 is partly under-annealing -- the FAIL rests on "floor never decreases" +
+the plateau signatures at N<=64, not on the slope. anneal_fns is an optimizer, not equilibrium MCMC.
+fns-nonexistence at small N is a residual confound at N=24-40. Instrument: the open-cube control was
+boundary-suppressed (d_s 2.40); a periodic 3-torus (d_s 3.0-3.2) is the correct matched control.
+
+**Side observation worth pulling on:** d_s rises toward the ~3 torus reference as N grows
+(2.65-3.28 at N=64) EVEN at empty-square density > 1 -- larger annealed flag configs already read as
+~3D before squares are eliminated. High variance; not a claim, but a thread: the geometry may
+improve with size+annealing without full fns.
+
+Bug fixed this commit: math.exp overflow in the Metropolis accept (crashed at N>=64) -- downhill
+moves now accept unconditionally.
