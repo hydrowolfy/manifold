@@ -1,0 +1,669 @@
+diff --git a/frontend/src/Series/Edit/EditSeriesModalContent.tsx b/frontend/src/Series/Edit/EditSeriesModalContent.tsx
+index 9a25c0f..26a9122 100644
+--- a/frontend/src/Series/Edit/EditSeriesModalContent.tsx
++++ b/frontend/src/Series/Edit/EditSeriesModalContent.tsx
+@@ -32,6 +32,21 @@ import RootFolderModal from './RootFolder/RootFolderModal';
+ import { RootFolderUpdated } from './RootFolder/RootFolderModalContent';
+ import styles from './EditSeriesModalContent.css';
+ 
++const episodeOrderingOptions = [
++  {
++    key: 'auto',
++    get value() {
++      return translate('EpisodeOrderingAuto');
++    },
++  },
++  {
++    key: 'tvdb',
++    get value() {
++      return translate('EpisodeOrderingTvdb');
++    },
++  },
++];
++
+ export interface EditSeriesModalContentProps {
+   seriesId: number;
+   onModalClose: () => void;
+@@ -50,6 +65,7 @@ function EditSeriesModalContent({
+     seasonFolder,
+     qualityProfileId,
+     seriesType,
++    episodeOrdering,
+     path,
+     tags,
+     rootFolderPath: initialRootFolderPath,
+@@ -75,6 +91,7 @@ function EditSeriesModalContent({
+         seasonFolder,
+         qualityProfileId,
+         seriesType,
++        episodeOrdering,
+         path,
+         tags,
+       },
+@@ -87,6 +104,7 @@ function EditSeriesModalContent({
+     seasonFolder,
+     qualityProfileId,
+     seriesType,
++    episodeOrdering,
+     path,
+     tags,
+     pendingChanges,
+@@ -224,6 +242,19 @@ function EditSeriesModalContent({
+             />
+           </FormGroup>
+ 
++          <FormGroup size={sizes.MEDIUM}>
++            <FormLabel>{translate('EpisodeOrdering')}</FormLabel>
++
++            <FormInputGroup
++              type={inputTypes.SELECT}
++              name="episodeOrdering"
++              values={episodeOrderingOptions}
++              {...settings.episodeOrdering}
++              helpText={translate('EpisodeOrderingHelpText')}
++              onChange={handleInputChange}
++            />
++          </FormGroup>
++
+           <FormGroup size={sizes.MEDIUM}>
+             <FormLabel>{translate('Path')}</FormLabel>
+ 
+diff --git a/frontend/src/Series/Series.ts b/frontend/src/Series/Series.ts
+index b35b90d..49b27a4 100644
+--- a/frontend/src/Series/Series.ts
++++ b/frontend/src/Series/Series.ts
+@@ -100,6 +100,7 @@ interface Series extends ModelBase {
+   tvRageId: number;
+   tmdbId: number;
+   useSceneNumbering: boolean;
++  episodeOrdering: string;
+   year: number;
+   isSaving?: boolean;
+   addOptions: SeriesAddOptions;
+diff --git a/src/NzbDrone.Core.Test/DataAugmentation/Xem/XemServiceFixture.cs b/src/NzbDrone.Core.Test/DataAugmentation/Xem/XemServiceFixture.cs
+new file mode 100644
+index 0000000..9ef5431
+--- /dev/null
++++ b/src/NzbDrone.Core.Test/DataAugmentation/Xem/XemServiceFixture.cs
+@@ -0,0 +1,113 @@
++using System.Collections.Generic;
++using System.Linq;
++using FizzWare.NBuilder;
++using Moq;
++using NUnit.Framework;
++using NzbDrone.Common.Cache;
++using NzbDrone.Core.DataAugmentation.Xem;
++using NzbDrone.Core.DataAugmentation.Xem.Model;
++using NzbDrone.Core.Test.Framework;
++using NzbDrone.Core.Tv;
++using NzbDrone.Core.Tv.Events;
++
++namespace NzbDrone.Core.Test.DataAugmentation.Xem
++{
++    [TestFixture]
++    public class XemServiceFixture : CoreTest<XemService>
++    {
++        private Series _series;
++        private List<Episode> _episodes;
++
++        [SetUp]
++        public void Setup()
++        {
++            Mocker.SetConstant<ICacheManager>(Mocker.Resolve<CacheManager>());
++
++            _series = Builder<Series>.CreateNew()
++                .With(s => s.TvdbId = 73141)
++                .With(s => s.UseSceneNumbering = true)
++                .With(s => s.EpisodeOrdering = EpisodeOrderingType.Tvdb)
++                .Build();
++
++            _episodes = Builder<Episode>.CreateListOfSize(2)
++                .All()
++                .With(e => e.SeriesId = _series.Id)
++                .With(e => e.SceneSeasonNumber = 13)
++                .With(e => e.SceneEpisodeNumber = 17)
++                .With(e => e.SceneAbsoluteEpisodeNumber = 250)
++                .Build()
++                .ToList();
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Setup(s => s.GetEpisodeBySeries(_series.Id))
++                  .Returns(_episodes);
++
++            Mocker.GetMock<IXemProxy>()
++                  .Setup(s => s.GetXemSeriesIds())
++                  .Returns(new List<int> { _series.TvdbId });
++        }
++
++        [Test]
++        public void should_clear_scene_numbering_when_ordering_is_pinned_to_tvdb_on_refresh()
++        {
++            Subject.Handle(new SeriesUpdatedEvent(_series));
++
++            Mocker.GetMock<IXemProxy>()
++                  .Verify(v => v.GetSceneTvdbMappings(It.IsAny<int>()), Times.Never());
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.UpdateEpisodes(It.Is<List<Episode>>(e =>
++                      e.Count == 2 &&
++                      e.All(x => x.SceneSeasonNumber == null && x.SceneEpisodeNumber == null && x.SceneAbsoluteEpisodeNumber == null))), Times.Once());
++
++            Mocker.GetMock<ISeriesService>()
++                  .Verify(v => v.UpdateSeries(It.Is<Series>(s => s.UseSceneNumbering == false), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once());
++        }
++
++        [Test]
++        public void should_clear_scene_numbering_when_ordering_changed_to_tvdb()
++        {
++            var oldSeries = Builder<Series>.CreateNew()
++                .With(s => s.TvdbId = _series.TvdbId)
++                .With(s => s.EpisodeOrdering = EpisodeOrderingType.Auto)
++                .Build();
++
++            Subject.Handle(new SeriesEditedEvent(_series, oldSeries));
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.UpdateEpisodes(It.IsAny<List<Episode>>()), Times.Once());
++
++            Mocker.GetMock<ISeriesService>()
++                  .Verify(v => v.UpdateSeries(It.Is<Series>(s => s.UseSceneNumbering == false), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once());
++        }
++
++        [Test]
++        public void should_not_clear_scene_numbering_when_ordering_did_not_change()
++        {
++            var oldSeries = Builder<Series>.CreateNew()
++                .With(s => s.TvdbId = _series.TvdbId)
++                .With(s => s.EpisodeOrdering = EpisodeOrderingType.Tvdb)
++                .Build();
++
++            Subject.Handle(new SeriesEditedEvent(_series, oldSeries));
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.UpdateEpisodes(It.IsAny<List<Episode>>()), Times.Never());
++        }
++
++        [Test]
++        public void should_apply_mappings_when_ordering_is_auto_on_refresh()
++        {
++            _series.EpisodeOrdering = EpisodeOrderingType.Auto;
++
++            Mocker.GetMock<IXemProxy>()
++                  .Setup(s => s.GetSceneTvdbMappings(_series.TvdbId))
++                  .Returns(new List<XemSceneTvdbMapping>());
++
++            Subject.Handle(new SeriesUpdatedEvent(_series));
++
++            Mocker.GetMock<IXemProxy>()
++                  .Verify(v => v.GetSceneTvdbMappings(_series.TvdbId), Times.Once());
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core.Test/IndexerSearchTests/ReleaseSearchServiceFixture.cs b/src/NzbDrone.Core.Test/IndexerSearchTests/ReleaseSearchServiceFixture.cs
+index 0da5fb0..e8390d1 100644
+--- a/src/NzbDrone.Core.Test/IndexerSearchTests/ReleaseSearchServiceFixture.cs
++++ b/src/NzbDrone.Core.Test/IndexerSearchTests/ReleaseSearchServiceFixture.cs
+@@ -265,6 +265,73 @@ public async Task scene_episodesearch()
+             criteria[0].EpisodeNumber.Should().Be(3);
+         }
+ 
++        [Test]
++        public async Task episode_search_should_use_tvdb_numbering_when_ordering_is_tvdb()
++        {
++            _xemSeries.EpisodeOrdering = EpisodeOrderingType.Tvdb;
++
++            WithEpisodes();
++
++            var allCriteria = WatchForSearchCriteria();
++
++            await Subject.EpisodeSearch(_xemEpisodes.First(), true, false);
++
++            var criteria = allCriteria.OfType<SingleEpisodeSearchCriteria>().ToList();
++
++            criteria.Count.Should().Be(1);
++            criteria[0].SeasonNumber.Should().Be(1);
++            criteria[0].EpisodeNumber.Should().Be(12);
++        }
++
++        [Test]
++        public async Task season_search_should_use_tvdb_numbering_when_ordering_is_tvdb()
++        {
++            _xemSeries.EpisodeOrdering = EpisodeOrderingType.Tvdb;
++
++            WithEpisodes();
++
++            var allCriteria = WatchForSearchCriteria();
++
++            await Subject.SeasonSearch(_xemSeries.Id, 2, false, false, true, false);
++
++            var criteria = allCriteria.OfType<SeasonSearchCriteria>().ToList();
++
++            criteria.Count.Should().Be(1);
++            criteria[0].SeasonNumber.Should().Be(2);
++        }
++
++        [Test]
++        public async Task episode_search_should_use_tvdb_numbering_for_scene_mapped_title_when_ordering_is_tvdb()
++        {
++            _xemSeries.EpisodeOrdering = EpisodeOrderingType.Tvdb;
++
++            WithEpisodes();
++
++            Mocker.GetMock<ISceneMappingService>()
++                  .Setup(s => s.FindByTvdbId(It.IsAny<int>()))
++                  .Returns(new List<SceneMapping>
++                  {
++                      new SceneMapping
++                      {
++                          SearchTerm = "Amerikan Dady",
++                          ParseTerm = "amerikandady",
++                          SeasonNumber = 1,
++                          SceneSeasonNumber = 2,
++                          Type = "XemService"
++                      }
++                  });
++
++            var allCriteria = WatchForSearchCriteria();
++
++            await Subject.EpisodeSearch(_xemEpisodes.First(), true, false);
++
++            var criteria = allCriteria.OfType<SingleEpisodeSearchCriteria>().ToList();
++
++            criteria.Count.Should().Be(2);
++            criteria.Should().OnlyContain(c => c.SeasonNumber == 1 && c.EpisodeNumber == 12);
++            criteria.SelectMany(c => c.SceneTitles).Should().Contain("Amerikan Dady");
++        }
++
+         [Test]
+         public async Task scene_seasonsearch()
+         {
+diff --git a/src/NzbDrone.Core.Test/ParserTests/ParsingServiceTests/EpisodeOrderingFixture.cs b/src/NzbDrone.Core.Test/ParserTests/ParsingServiceTests/EpisodeOrderingFixture.cs
+new file mode 100644
+index 0000000..f5d3e07
+--- /dev/null
++++ b/src/NzbDrone.Core.Test/ParserTests/ParsingServiceTests/EpisodeOrderingFixture.cs
+@@ -0,0 +1,108 @@
++using System.Collections.Generic;
++using FizzWare.NBuilder;
++using FluentAssertions;
++using Moq;
++using NUnit.Framework;
++using NzbDrone.Core.DataAugmentation.Scene;
++using NzbDrone.Core.Languages;
++using NzbDrone.Core.Parser;
++using NzbDrone.Core.Parser.Model;
++using NzbDrone.Core.Tv;
++using NzbDrone.Test.Common;
++
++namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
++{
++    [TestFixture]
++    public class EpisodeOrderingFixture : TestBase<ParsingService>
++    {
++        private Series _series;
++        private ParsedEpisodeInfo _parsedEpisodeInfo;
++
++        [SetUp]
++        public void Setup()
++        {
++            _series = Builder<Series>.CreateNew()
++                .With(s => s.Title = "American Dad!")
++                .With(s => s.CleanTitle = "americandad")
++                .With(s => s.UseSceneNumbering = true)
++                .With(s => s.EpisodeOrdering = EpisodeOrderingType.Auto)
++                .Build();
++
++            _parsedEpisodeInfo = new ParsedEpisodeInfo
++            {
++                SeriesTitle = _series.Title,
++                ReleaseTitle = "American.Dad.S13E17.720p.WEB-DL",
++                SeasonNumber = 13,
++                EpisodeNumbers = new[] { 17 },
++                AbsoluteEpisodeNumbers = System.Array.Empty<int>(),
++                Languages = new List<Language> { Language.English }
++            };
++
++            Mocker.GetMock<ISeriesService>()
++                  .Setup(s => s.FindByTitle(It.IsAny<string>()))
++                  .Returns(_series);
++        }
++
++        private void GivenSceneMapping()
++        {
++            Mocker.GetMock<ISceneMappingService>()
++                  .Setup(s => s.FindSceneMapping(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
++                  .Returns(new SceneMapping
++                  {
++                      Title = "American Dad!",
++                      SearchTerm = "American Dad!",
++                      SeasonNumber = 14,
++                      SceneSeasonNumber = 13,
++                      Type = "XemService"
++                  });
++        }
++
++        [Test]
++        public void should_apply_scene_mapping_season_offset_when_ordering_is_auto()
++        {
++            GivenSceneMapping();
++
++            var result = Subject.Map(_parsedEpisodeInfo, _series.TvdbId, _series.TvRageId, _series.ImdbId);
++
++            result.MappedSeasonNumber.Should().Be(14);
++        }
++
++        [Test]
++        public void should_not_apply_scene_mapping_season_offset_when_ordering_is_tvdb()
++        {
++            GivenSceneMapping();
++
++            _series.EpisodeOrdering = EpisodeOrderingType.Tvdb;
++
++            var result = Subject.Map(_parsedEpisodeInfo, _series.TvdbId, _series.TvRageId, _series.ImdbId);
++
++            result.MappedSeasonNumber.Should().Be(13);
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.FindEpisode(_series.Id, 13, 17), Times.Once());
++        }
++
++        [Test]
++        public void should_not_use_scene_numbering_lookup_when_ordering_is_tvdb()
++        {
++            _series.EpisodeOrdering = EpisodeOrderingType.Tvdb;
++
++            Subject.Map(_parsedEpisodeInfo, _series.TvdbId, _series.TvRageId, _series.ImdbId);
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.FindEpisodesBySceneNumbering(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never());
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.FindEpisode(_series.Id, 13, 17), Times.Once());
++        }
++
++        [Test]
++        public void should_use_scene_numbering_lookup_when_ordering_is_auto()
++        {
++            Subject.Map(_parsedEpisodeInfo, _series.TvdbId, _series.TvRageId, _series.ImdbId);
++
++            Mocker.GetMock<IEpisodeService>()
++                  .Verify(v => v.FindEpisodesBySceneNumbering(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once());
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core/DataAugmentation/Xem/XemService.cs b/src/NzbDrone.Core/DataAugmentation/Xem/XemService.cs
+index a8c13b7..26514f9 100644
+--- a/src/NzbDrone.Core/DataAugmentation/Xem/XemService.cs
++++ b/src/NzbDrone.Core/DataAugmentation/Xem/XemService.cs
+@@ -10,7 +10,7 @@
+ 
+ namespace NzbDrone.Core.DataAugmentation.Xem
+ {
+-    public class XemService : ISceneMappingProvider, IHandle<SeriesUpdatedEvent>, IHandle<SeriesRefreshStartingEvent>
++    public class XemService : ISceneMappingProvider, IHandle<SeriesUpdatedEvent>, IHandle<SeriesEditedEvent>, IHandle<SeriesRefreshStartingEvent>
+     {
+         private readonly IEpisodeService _episodeService;
+         private readonly IXemProxy _xemProxy;
+@@ -37,6 +37,12 @@ private void PerformUpdate(Series series)
+ 
+             try
+             {
++                if (series.EpisodeOrdering == EpisodeOrderingType.Tvdb)
++                {
++                    RemoveSceneNumbering(series);
++                    return;
++                }
++
+                 var mappings = _xemProxy.GetSceneTvdbMappings(series.TvdbId);
+ 
+                 if (!mappings.Any() && !series.UseSceneNumbering)
+@@ -232,6 +238,57 @@ public List<SceneMapping> GetSceneMappings()
+             return mappings;
+         }
+ 
++        private void RemoveSceneNumbering(Series series)
++        {
++            _logger.Debug("Episode ordering for {0} is pinned to TVDB, removing scene numbering", series);
++
++            var episodes = _episodeService.GetEpisodeBySeries(series.Id);
++            var changedEpisodes = episodes.Where(v => v.SceneAbsoluteEpisodeNumber.HasValue ||
++                                                      v.SceneSeasonNumber.HasValue ||
++                                                      v.SceneEpisodeNumber.HasValue ||
++                                                      v.UnverifiedSceneNumbering)
++                                          .ToList();
++
++            foreach (var episode in changedEpisodes)
++            {
++                episode.SceneAbsoluteEpisodeNumber = null;
++                episode.SceneSeasonNumber = null;
++                episode.SceneEpisodeNumber = null;
++                episode.UnverifiedSceneNumbering = false;
++            }
++
++            if (changedEpisodes.Any())
++            {
++                _episodeService.UpdateEpisodes(changedEpisodes);
++            }
++
++            if (series.UseSceneNumbering)
++            {
++                series.UseSceneNumbering = false;
++                _seriesService.UpdateSeries(series);
++            }
++        }
++
++        public void Handle(SeriesEditedEvent message)
++        {
++            if (message.OldSeries == null || message.Series.EpisodeOrdering == message.OldSeries.EpisodeOrdering)
++            {
++                return;
++            }
++
++            if (message.Series.EpisodeOrdering == EpisodeOrderingType.Tvdb)
++            {
++                RemoveSceneNumbering(message.Series);
++                return;
++            }
++
++            // Ordering switched back to Auto, reapply mappings if XEM has this series
++            if (_cache.Count != 0 && _cache.Find(message.Series.TvdbId.ToString()))
++            {
++                PerformUpdate(message.Series);
++            }
++        }
++
+         public void Handle(SeriesUpdatedEvent message)
+         {
+             if (_cache.IsExpired(TimeSpan.FromHours(3)))
+diff --git a/src/NzbDrone.Core/Datastore/Migration/218_add_episode_ordering_to_series.cs b/src/NzbDrone.Core/Datastore/Migration/218_add_episode_ordering_to_series.cs
+new file mode 100644
+index 0000000..cc2f702
+--- /dev/null
++++ b/src/NzbDrone.Core/Datastore/Migration/218_add_episode_ordering_to_series.cs
+@@ -0,0 +1,14 @@
++using FluentMigrator;
++using NzbDrone.Core.Datastore.Migration.Framework;
++
++namespace NzbDrone.Core.Datastore.Migration
++{
++    [Migration(218)]
++    public class add_episode_ordering_to_series : NzbDroneMigrationBase
++    {
++        protected override void MainDbUpgrade()
++        {
++            Alter.Table("Series").AddColumn("EpisodeOrdering").AsInt32().WithDefaultValue(0);
++        }
++    }
++}
+diff --git a/src/NzbDrone.Core/IndexerSearch/ReleaseSearchService.cs b/src/NzbDrone.Core/IndexerSearch/ReleaseSearchService.cs
+index 6625015..c4e4dec 100644
+--- a/src/NzbDrone.Core/IndexerSearch/ReleaseSearchService.cs
++++ b/src/NzbDrone.Core/IndexerSearch/ReleaseSearchService.cs
+@@ -230,6 +230,7 @@ private List<SceneEpisodeMapping> GetSceneEpisodeMappings(Series series, Episode
+         private IEnumerable<SceneEpisodeMapping> GetSceneEpisodeMappings(Series series, Episode episode, List<SceneMapping> sceneMappings)
+         {
+             var includeGlobal = true;
++            var forceTvdb = series.EpisodeOrdering == EpisodeOrderingType.Tvdb;
+ 
+             foreach (var sceneMapping in sceneMappings)
+             {
+@@ -237,15 +238,26 @@ private IEnumerable<SceneEpisodeMapping> GetSceneEpisodeMappings(Series series,
+                 // - Mapped on Release Season Number with sceneMapping.SceneSeasonNumber specified and optionally sceneMapping.SeasonNumber. This translates via episode.SceneSeasonNumber/SeasonNumber to specific episodes.
+                 // - Mapped on Episode Season Number with optionally sceneMapping.SeasonNumber. This translates from episode.SceneSeasonNumber/SeasonNumber to specific releases. (Filter by episode.SeasonNumber or globally)
+ 
+-                var ignoreSceneNumbering = sceneMapping.SceneOrigin == "tvdb" || sceneMapping.SceneOrigin == "unknown:tvdb";
++                var ignoreSceneNumbering = forceTvdb || sceneMapping.SceneOrigin == "tvdb" || sceneMapping.SceneOrigin == "unknown:tvdb";
+                 var mappingSceneSeasonNumber = sceneMapping.SceneSeasonNumber.NonNegative();
+                 var mappingSeasonNumber = sceneMapping.SeasonNumber.NonNegative();
+ 
+                 // Select scene or tvdb on the episode
+                 var mappedSeasonNumber = ignoreSceneNumbering ? episode.SeasonNumber : (episode.SceneSeasonNumber ?? episode.SeasonNumber);
+-                var releaseSeasonNumber = sceneMapping.SceneSeasonNumber.NonNegative() ?? mappedSeasonNumber;
++                var releaseSeasonNumber = forceTvdb ? episode.SeasonNumber : (sceneMapping.SceneSeasonNumber.NonNegative() ?? mappedSeasonNumber);
+ 
+-                if (mappingSceneSeasonNumber.HasValue)
++                if (forceTvdb)
++                {
++                    // The user has pinned this series to TVDB ordering, only use mappings as alternative title sources
++                    // and check applicability against the TVDB season number.
++                    var applicableSeasonNumber = sceneMapping.SeasonNumber.NonNegative() ?? sceneMapping.SceneSeasonNumber.NonNegative();
++
++                    if (applicableSeasonNumber.HasValue && applicableSeasonNumber.Value != episode.SeasonNumber)
++                    {
++                        continue;
++                    }
++                }
++                else if (mappingSceneSeasonNumber.HasValue)
+                 {
+                     // Apply the alternative mapping (release to scene/tvdb)
+                     var mappedAltSeasonNumber = sceneMapping.SeasonNumber.NonNegative() ?? sceneMapping.SceneSeasonNumber.NonNegative() ?? mappedSeasonNumber;
+@@ -307,9 +319,9 @@ private IEnumerable<SceneEpisodeMapping> GetSceneEpisodeMappings(Series series,
+                     Episode = episode,
+                     SearchMode = SearchMode.Default,
+                     SceneTitles = new List<string> { series.Title },
+-                    SeasonNumber = episode.SceneSeasonNumber ?? episode.SeasonNumber,
+-                    EpisodeNumber = episode.SceneEpisodeNumber ?? episode.EpisodeNumber,
+-                    AbsoluteEpisodeNumber = episode.SceneSeasonNumber ?? episode.AbsoluteEpisodeNumber
++                    SeasonNumber = forceTvdb ? episode.SeasonNumber : (episode.SceneSeasonNumber ?? episode.SeasonNumber),
++                    EpisodeNumber = forceTvdb ? episode.EpisodeNumber : (episode.SceneEpisodeNumber ?? episode.EpisodeNumber),
++                    AbsoluteEpisodeNumber = forceTvdb ? episode.AbsoluteEpisodeNumber : (episode.SceneSeasonNumber ?? episode.AbsoluteEpisodeNumber)
+                 };
+             }
+         }
+@@ -350,9 +362,18 @@ private async Task<List<DownloadDecision>> SearchAnime(Series series, Episode ep
+ 
+             searchSpec.IsSeasonSearch = isSeasonSearch;
+ 
+-            searchSpec.SeasonNumber = episode.SceneSeasonNumber ?? episode.SeasonNumber;
+-            searchSpec.EpisodeNumber = episode.SceneEpisodeNumber ?? episode.EpisodeNumber;
+-            searchSpec.AbsoluteEpisodeNumber = episode.SceneAbsoluteEpisodeNumber ?? episode.AbsoluteEpisodeNumber ?? 0;
++            if (series.EpisodeOrdering == EpisodeOrderingType.Tvdb)
++            {
++                searchSpec.SeasonNumber = episode.SeasonNumber;
++                searchSpec.EpisodeNumber = episode.EpisodeNumber;
++                searchSpec.AbsoluteEpisodeNumber = episode.AbsoluteEpisodeNumber ?? 0;
++            }
++            else
++            {
++                searchSpec.SeasonNumber = episode.SceneSeasonNumber ?? episode.SeasonNumber;
++                searchSpec.EpisodeNumber = episode.SceneEpisodeNumber ?? episode.EpisodeNumber;
++                searchSpec.AbsoluteEpisodeNumber = episode.SceneAbsoluteEpisodeNumber ?? episode.AbsoluteEpisodeNumber ?? 0;
++            }
+ 
+             var downloadDecisions = await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
+ 
+diff --git a/src/NzbDrone.Core/Localization/Core/en.json b/src/NzbDrone.Core/Localization/Core/en.json
+index c7a7c1f..2ca8899 100644
+--- a/src/NzbDrone.Core/Localization/Core/en.json
++++ b/src/NzbDrone.Core/Localization/Core/en.json
+@@ -653,6 +653,10 @@
+   "EpisodeMissingFromDisk": "Episode missing from disk",
+   "EpisodeNaming": "Episode Naming",
+   "EpisodeNumbers": "Episode Number(s)",
++  "EpisodeOrdering": "Episode Ordering",
++  "EpisodeOrderingAuto": "Automatic (Scene Mappings)",
++  "EpisodeOrderingHelpText": "Numbering scheme used when parsing and searching releases for this series. Select 'TheTVDB' to ignore scene numbering mappings (e.g. from TheXEM) and always use TheTVDB season/episode numbers",
++  "EpisodeOrderingTvdb": "TheTVDB",
+   "EpisodeProgress": "Episode Progress",
+   "EpisodeRequested": "Episode Requested",
+   "EpisodeSearchResultsLoadError": "Unable to load results for this episode search. Try again later",
+diff --git a/src/NzbDrone.Core/Parser/ParsingService.cs b/src/NzbDrone.Core/Parser/ParsingService.cs
+index 7cbff94..60f8677 100644
+--- a/src/NzbDrone.Core/Parser/ParsingService.cs
++++ b/src/NzbDrone.Core/Parser/ParsingService.cs
+@@ -185,6 +185,13 @@ private RemoteEpisode Map(ParsedEpisodeInfo parsedEpisodeInfo, int tvdbId, int t
+             {
+                 remoteEpisode.Series = series;
+ 
++                if (series.EpisodeOrdering == EpisodeOrderingType.Tvdb)
++                {
++                    // The user has pinned this series to TVDB ordering, use the numbering from the release as-is.
++                    sceneSource = false;
++                    remoteEpisode.MappedSeasonNumber = parsedEpisodeInfo.SeasonNumber;
++                }
++
+                 if (ValidateParsedEpisodeInfo.ValidateForSeriesType(parsedEpisodeInfo, series))
+                 {
+                     remoteEpisode.Episodes = GetEpisodes(parsedEpisodeInfo, series, remoteEpisode.MappedSeasonNumber, sceneSource, searchCriteria);
+diff --git a/src/NzbDrone.Core/Tv/EpisodeOrderingType.cs b/src/NzbDrone.Core/Tv/EpisodeOrderingType.cs
+new file mode 100644
+index 0000000..adcd3f2
+--- /dev/null
++++ b/src/NzbDrone.Core/Tv/EpisodeOrderingType.cs
+@@ -0,0 +1,8 @@
++namespace NzbDrone.Core.Tv
++{
++    public enum EpisodeOrderingType
++    {
++        Auto = 0,
++        Tvdb = 1
++    }
++}
+diff --git a/src/NzbDrone.Core/Tv/Series.cs b/src/NzbDrone.Core/Tv/Series.cs
+index 2464742..069deed 100644
+--- a/src/NzbDrone.Core/Tv/Series.cs
++++ b/src/NzbDrone.Core/Tv/Series.cs
+@@ -42,6 +42,7 @@ public Series()
+         public int Runtime { get; set; }
+         public List<MediaCover.MediaCover> Images { get; set; }
+         public SeriesTypes SeriesType { get; set; }
++        public EpisodeOrderingType EpisodeOrdering { get; set; }
+         public string Network { get; set; }
+         public bool UseSceneNumbering { get; set; }
+         public string TitleSlug { get; set; }
+@@ -80,6 +81,7 @@ public void ApplyChanges(Series otherSeries)
+             MonitorNewItems = otherSeries.MonitorNewItems;
+ 
+             SeriesType = otherSeries.SeriesType;
++            EpisodeOrdering = otherSeries.EpisodeOrdering;
+             RootFolderPath = otherSeries.RootFolderPath;
+             Tags = otherSeries.Tags;
+             AddOptions = otherSeries.AddOptions;
+diff --git a/src/Sonarr.Api.V3/Series/SeriesResource.cs b/src/Sonarr.Api.V3/Series/SeriesResource.cs
+index af14902..0bffddc 100644
+--- a/src/Sonarr.Api.V3/Series/SeriesResource.cs
++++ b/src/Sonarr.Api.V3/Series/SeriesResource.cs
+@@ -47,6 +47,7 @@ public class SeriesResource : RestResource
+         public NewItemMonitorTypes MonitorNewItems { get; set; }
+ 
+         public bool UseSceneNumbering { get; set; }
++        public EpisodeOrderingType EpisodeOrdering { get; set; }
+         public int Runtime { get; set; }
+         public int TvdbId { get; set; }
+         public int TvRageId { get; set; }
+@@ -120,6 +121,7 @@ public static SeriesResource ToResource(this NzbDrone.Core.Tv.Series model, bool
+                        MonitorNewItems = model.MonitorNewItems,
+ 
+                        UseSceneNumbering = model.UseSceneNumbering,
++                       EpisodeOrdering = model.EpisodeOrdering,
+                        Runtime = model.Runtime,
+                        TvdbId = model.TvdbId,
+                        TvRageId = model.TvRageId,
+@@ -185,6 +187,7 @@ public static NzbDrone.Core.Tv.Series ToModel(this SeriesResource resource)
+                        MonitorNewItems = resource.MonitorNewItems,
+ 
+                        UseSceneNumbering = resource.UseSceneNumbering,
++                       EpisodeOrdering = resource.EpisodeOrdering,
+                        Runtime = resource.Runtime,
+                        TvdbId = resource.TvdbId,
+                        TvRageId = resource.TvRageId,
