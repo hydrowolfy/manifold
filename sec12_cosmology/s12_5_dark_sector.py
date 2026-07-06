@@ -1,0 +1,24 @@
+"""Dark energy / accelerated expansion
+
+AXIOM/GOAL: Explain accelerated expansion from the substrate.
+APPROACH:   Conjecture: the substrate intrinsic growth (de Sitter K) acts as a positive cosmological term. Speculative.
+STATUS:     CONJECTURE
+"""
+STATUS = "CONJECTURE"
+TITLE = "Dark energy / accelerated expansion"
+AXIOM = "Explain accelerated expansion from the substrate."
+APPROACH = "Conjecture: the substrate intrinsic growth (de Sitter K) acts as a positive cosmological term. Speculative."
+
+
+def run():
+    print("[%s] %s" % (STATUS, TITLE))
+    print("  goal:     " + AXIOM)
+    print("  approach: " + APPROACH)
+    _note = {
+        "OPEN": ">> Not yet derived. Target and approach recorded; no result is claimed.",
+        "BORROWED": ">> Relies on an external theorem; not re-derived inside this program.",
+        "CONJECTURE": ">> Proposed but untested. No numerical support yet.",
+        "PARTIAL": ">> A partial result exists; the full derivation is incomplete (see whitepaper).",
+    }.get(STATUS)
+    if _note:
+        print("  " + _note)
