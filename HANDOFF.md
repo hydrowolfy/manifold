@@ -10,7 +10,14 @@ A fresh session clones the repo instead of relying on a mounted folder.
     cd /tmp/m && git checkout causal-cdt-scaling
     pip install networkx --break-system-packages        # the ONLY dependency (no numpy)
 
-All campaign code, reports and the results log are committed on the branch (no copy step).
+All campaign code and reports are committed on the branch. The 204-record results log
+`cdt_causal_results.jsonl` is delivered in the session outputs folder, NOT committed via
+the connector (a ~101 KB dense-float log can't be relayed byte-exact through the API
+payload); add it to the branch from a local clone:
+
+    cp <outputs-folder>/cdt_causal_results.jsonl . && git add cdt_causal_results.jsonl
+    git commit -m 'add causal CDT results log' && git push
+
 Selftest gate before any physics (must print ALL CAUSAL SELF-TESTS PASSED):
 
     cd /tmp/m && PYTHONPATH=.:tooling python3 cdt_causal_run.py --selftest
@@ -87,8 +94,8 @@ capped ~45 s wall, so chunks must run foreground; checkpoint every chunk.
 - euclid_control.py: chunked Euclidean control (negative control).
 - torus_benchmark.py: exact periodic Kuhn T^3 benchmark (--ms m --long).
 - track38.py, summarize_scaling.py: d_H-vs-sweeps tracker and aggregation.
-- cdt_causal_results.jsonl: all measurements, four campaigns (204 records). kinds: causal
-  chunk (default), torus_benchmark, euclid_control, long_measure.
+- cdt_causal_results.jsonl: all measurements, four campaigns (204 records; in outputs folder,
+  add via section 1). kinds: causal chunk (default), torus_benchmark, euclid_control, long_measure.
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md: the four campaign
   reports in order; CONVERGENCE is the closer with the joint-gate verdict.
 - tooling/: referee estimators (link_census, lazy_rw_sdim, ball_growth_dim, to_graph).
