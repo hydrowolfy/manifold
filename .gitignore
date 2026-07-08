@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+scratch/
+*.pkl
+cdt_checkpoints.tar.gz
