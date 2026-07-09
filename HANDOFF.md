@@ -1,101 +1,90 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
-Updated 2026-07-08, end of the fourth campaign. The work now lives in git: branch
-`causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
-A fresh session clones the repo instead of relying on a mounted folder.
+Updated 2026-07-09, end of the FIFTH campaign (the "frontier" campaign). Work lives in git:
+branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
+Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_FRONTIER.md` is the
+current closer, `PREREG_CDT_JOINT.md` the preregistration it answers.
 
-## 1. Environment setup (fresh session, Linux sandbox)
+## 0. Bottom line so far
 
-    git clone https://github.com/hydrowolfy/manifold.git /tmp/m
+Genuine 2+1D causal CDT is built and validated (typed (3,1)/(2,2)/(1,3) tets on S^2 x S^1,
+five foliation-preserving Pachner moves, census bad=0 everywhere). It breaks Euclidean crumpling
+(d_H(2-6) converges; Euclid d_s never flows). The frontier question -- can d_H AND d_s hit the
+exact-T^3 benchmark JOINTLY at large V -- is answered:
+
+**No, not cleanly. The d_H-d_s tradeoff is a genuine, VOLUME-STABLE structural obstruction,
+controlled by slice size s = N3/T. Both dims are V-independent monotonic functions of s;
+d_s(8-24)=benchmark at s~=385, d_H(2-6)=benchmark at s~=1940 (~5x apart) -- no aspect at any V
+lands both. The alpha (k22) lever moves both toward benchmark but only by driving spatial-volume
+condensation (transient crossing, not a stable 3-manifold). On the long window (16-48) the
+fattest V=24000 aspect is within ~0.17 of benchmark on both -- a weak long-window near-agreement
+suggesting the short-window excess is partly a lattice artifact.** Full detail + gate table +
+caveats in REPORT_CDT_FRONTIER.md.
+
+Top untested lever: k0 (the CDT phase). All five campaigns fixed k0=2; alpha's condensation was
+mapped only there. A k0 x k22 scan could in principle suppress the condensation.
+
+## 1. Environment (fresh session, Linux sandbox)
+
+    git clone https://github.com/hydrowolfy/manifold.git /tmp/m   # or into sandbox home
     cd /tmp/m && git checkout causal-cdt-scaling
-    pip install networkx --break-system-packages        # the ONLY dependency (no numpy)
+    pip install networkx --break-system-packages     # ONLY dependency (no numpy)
+    export MANIFOLD_REPO=$(pwd)
+    PYTHONPATH=.:tooling python3 cdt_causal_run.py --selftest     # must print ALL ... PASSED
 
-All campaign code and reports are committed on the branch. The 204-record results log
-`cdt_causal_results.jsonl` is delivered in the session outputs folder, NOT committed via
-the connector (a ~101 KB dense-float log can't be relayed byte-exact through the API
-payload); add it to the branch from a local clone:
+NOTE: git does NOT work on a mounted outputs dir (unlink EPERM) -- clone into sandbox-local home
+and commit via the GitHub connector. Keep *.pkl / tarball / floats jsonl out of git.
 
-    cp <outputs-folder>/cdt_causal_results.jsonl . && git add cdt_causal_results.jsonl
-    git commit -m 'add causal CDT results log' && git push
+## 2. Checkpoints & data are NOT in the repo (deliberate)
 
-Selftest gate before any physics (must print ALL CAUSAL SELF-TESTS PASSED):
+Chain-state pickles (scratch/*.pkl) and the measurement jsonls are gitignored (binary/large,
+connector can't attach). They regenerate deterministically per seed. If a prior session's
+/tmp/work exists, its scratch/*.pkl are usually world-readable -- COPY them into your scratch to
+resume campaign-4/5 states without regrowing (the runner is byte-identical on the branch, so they
+unpickle). Every measurement is reproducible from the seeds.
 
-    cd /tmp/m && PYTHONPATH=.:tooling python3 cdt_causal_run.py --selftest
-
-## 2. Checkpoints are NOT in the repo (deliberate)
-
-The 24 chain-state pickles (~9.3 MB `cdt_checkpoints.tar.gz`) are intentionally left out of
-git (binary, large; the connector can't attach release assets or LFS pointers). They are
-also not required:
-- Every measurement is in `cdt_causal_results.jsonl` (204 records); the physics conclusions
-  are fully reproducible from it.
-- To resume mid-chain, regenerate pickles by rerunning the exact `--chunk` command for a
-  chain (fixed `--seed`); the runner grows to volume and re-thermalizes deterministically per
-  seed. `.gitignore` excludes `scratch/`, `*.pkl`, and the tarball.
-If a session still has the tarball locally: `tar xzf cdt_checkpoints.tar.gz -C /tmp/m` creates
-`/tmp/m/scratch/*.pkl`. Checkpoints unpickle ONLY inside `cdt_causal_run.py` run as __main__
-(the Causal class lives in __main__); resume = rerun the same `--chunk` command with
-`--scratch <dir>` pointing at the pickles.
-
-## 3. Runner usage (important flags)
+## 3. Runner + tools (key flags)
 
     PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \
-      --k0 2.0 --T 19 --V 24000 --seed 0 --tune 500 --sweeps 1400 \
-      --budget-s 36 --scratch <writable-dir>/scratch --log <writable-dir>/rec.jsonl
+      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \
+      --budget-s 34 --scratch <dir>/scratch --log <dir>/rec.jsonl
+- `--grind` : fast thermalization -- runs sweeps, keeps census + checkpoint, SKIPS the d_s/d_H
+  estimators (~5-6 s/chunk saved). Use for the V=24000 f22 climb; switch to normal chunks near
+  equilibrium (f22 ~0.38). NEW this campaign (see grind.patch).
+- `--k22 X` : the CDT asymmetry (coeff on N22). k22>0 penalizes (2,2) tets -> lowers f22, raises
+  N0/d_H, lowers d_s, and (crucially) drives profile condensation. Separate scratch dir per k22
+  (the checkpoint tag is (k0,T,V,seed) and omits k22 -- collisions otherwise).
+- `--measure-long` : measure current pickle (no advance), windows d_s 4-12/8-24/16-48/30-90,
+  d_H 2-6/3-8/4-10, tmax=100.
+- `remeasure.py` (NEW): re-measure any pickle OR exact torus with K estimator seeds -> error bars,
+  profile CV, mean degree. `--pkl <p> --seeds 8 --tmax 50 --dswin 8-24,16-48 --seedbase 100`
+  (use a different --seedbase for independent verification). `--torus m` for the benchmark.
+- `torus_benchmark.py` : exact Kuhn T^3; size-match by N0 (V6000<->m10, V12000<->m13, V24000<->m16).
+- Budgets: V=24000 pair <= 34 s (2x5.6MB saves + measure overran 45s at 40s); V<=12000 <= 38 s.
+  ONE pair per bash call (looping budgeted chunks blows the 45 s cap).
 
-- Default `--scratch` is `/tmp/m/scratch`; pass a WRITABLE dir if the clone is read-only.
-- Each `--chunk` resumes the pickle by (k0,T,V,seed) tag, advances within `--budget-s`
-  wall-clock, measures, appends one JSON line, re-pickles. Fully resumable.
-- Keep budget so sweep-loop + measurement + save < ~44 s: ~40 s solo, ~36 s for a
-  2-parallel pair at V=24000 (heavier measure + two 3.3 MB saves overran a 45 s cap at 40 s).
-- `--measure-long` (tmax=100) measures the current pickle state (no advance) and writes a
-  `long_measure` record with d_s windows 4-12/8-24/16-48/30-90 and d_H 2-6/3-8/4-10.
-- Windows 16-48 and 30-90 are size-contaminated below N0~2000 (and 30-90 still is at
-  N0~3800); 8-24 is the trustworthy long d_s window.
+## 4. Throughput (measured)
 
-## 4. State of evidence (see the four REPORT_CDT_*.md, in order)
+~8 sweeps/s @ V6000, ~2.3-3/s @ V12000, ~1.1/s @ V24000 (pair). V=24000 fresh thermalization is
+~18-20 chunk-pairs (grow leaves f22~0.03, must climb to ~0.38). alpha warm-start re-equilibration
+~1000-2000 sweeps. Benchmark m<=16 remeasure with 8 seeds is a few seconds.
 
-Genuine 2+1D causal CDT: typed (3,1)/(2,2)/(1,3) tets on S^2 x S^1, foliation-preserving
-Pachner moves, Metropolis with k3 auto-tune; census bad=0 in every snapshot ever taken.
-Breaks Euclidean crumpling (Euclid controls: d_s pinned 3.87-3.98, never flow).
+## 5. What remains (ranked)
 
-Balanced-aspect ladder (T ∝ V^(1/3) normalised to T=12@V=6000; k0=2, 2 seeds) verdict
-(REPORT_CDT_CONVERGENCE.md): NOT a clean joint 3-manifold convergence, but no crumple-back:
-- d_H(2-6) CONVERGES: fat-ladder ratio 0.75 -> 0.82 -> 0.93 (V=6000/12000/24000), near
-  parity at V=24000, gap still closing.
-- d_s(8-24) does NOT join it on the d_H-optimal (fat) ladder: excess +0.22/+0.68/+0.41, not
-  closing. Thin chains (T=16@6000, T=18@12000) put d_s on the line (-0.14/+0.28) but d_H
-  lags (0.65/0.78). No single aspect gives both -> real d_H-d_s finite-size tradeoff.
-- d_H(3-8): tracks benchmark slope but ratio stuck ~0.5 on both ladders.
-Benchmark = exact flat T^3 (Kuhn), now m=5..16; score against it, never against 3.0.
+1. k0 x k22 phase scan: does a different CDT phase suppress alpha's condensation and permit a
+   STABLE joint pass? Untested; the highest-value lever.
+2. Genuinely thin large-T V=24000 (T~60, s~385) to put a MEASURED d_H at the d_s=benchmark slice
+   size at the top volume -- nails the volume-stability of the 0.64 d_H ratio directly.
+3. Measure the de Sitter volume profile of the alpha-condensed states -- physical extended phase
+   or a collapse? (Decides how to read the alpha "improvement".)
+4. Euclid control at matched large size (negative-control arm above n0<=500).
 
-NB: the handoff formula `T=round(1.9*V^(1/3))` was wrong (gives ~35 at V=6000); the
-aspect-preserving constant is 0.66, i.e. T = round(12*(V/6000)^(1/3)) = 12/15/19.
+## 6. File inventory (branch causal-cdt-scaling)
 
-## 5. What remains
-
-One thin-aspect point at V=24000 (T ~ 22-23, k0=2, 2 seeds) to confirm d_s(8-24) stays on
-the benchmark line at the top of the ladder while d_H(2-6) lags — pinning the tradeoff as
-volume-stable. Optional: a Euclid control at matched large size (n0~1000, tets~7000) to
-extend the negative-control arm above its current n0<=500.
-
-## 6. Cost calibration (measured)
-
-Throughput ~ 8 sweeps/s at V=6000, ~2.4-3.2/s at V=12000 (2-parallel), ~1.1/s at V=24000.
-Grow-to-volume is fast (~4-12 s, first chunk only; use a small first `--budget-s` at V=24000
-so the grown state checkpoints). Measurement+save overhead ~2-4 s even at V=24000. A V=24000
-seed to ~650 sweeps (f22 0.36-0.37 equilibrium + 3 post-tune snapshots) took ~16-18 chunks.
-The bash/exec sandbox does NOT keep background processes alive between calls, and each call is
-capped ~45 s wall, so chunks must run foreground; checkpoint every chunk.
-
-## 7. File inventory (repo, branch causal-cdt-scaling)
-
-- cdt_causal_run.py: the 2+1D causal CDT implementation + selftest + chunked runner.
-- euclid_control.py: chunked Euclidean control (negative control).
-- torus_benchmark.py: exact periodic Kuhn T^3 benchmark (--ms m --long).
-- track38.py, summarize_scaling.py: d_H-vs-sweeps tracker and aggregation.
-- cdt_causal_results.jsonl: all measurements, four campaigns (204 records; in outputs folder,
-  add via section 1). kinds: causal chunk (default), torus_benchmark, euclid_control, long_measure.
-- REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md: the four campaign
-  reports in order; CONVERGENCE is the closer with the joint-gate verdict.
-- tooling/: referee estimators (link_census, lazy_rw_sdim, ball_growth_dim, to_graph).
+- cdt_causal_run.py : the 2+1D causal CDT implementation + selftest + chunked runner (+ `--grind`).
+- remeasure.py : seed-averaged re-measurement of pickles/tori with error bars + profile CV + degree.
+- euclid_control.py : Euclidean negative control. torus_benchmark.py : exact Kuhn T^3.
+- PREREG_CDT_JOINT.md : campaign-5 preregistration (gate, benchmark, H1/H2/H3, decision rules).
+- REPORT_CDT_FRONTIER.md : campaign-5 verdict (slice-size obstruction; alpha condensation; long-window).
+- REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
+- LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).
