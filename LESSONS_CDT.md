@@ -118,3 +118,32 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     (sigma=0.10, ratio 0.935) the profile is EXTENDED: CV 0.24, no stalk, volume across 11/12 slices, stable.
     So a d_s "improvement" via low f22 is CONDENSATION, not a real extended 3-manifold; only the hub/d_H near-miss
     is a genuine extended geometry (it merely lands the wrong dimension). Read alpha/d_s gains as collapse.
+
+## STAGE 1 additions (surgical -- torus spatial slices, T^2 x S^1; cdt_torus_run.py)
+24. TOPOLOGY DOES NOT UNLOCK THE IDENTITY -- ONLY ITS CONSTANT. Generalized Euler for a genus-g slice:
+    chi=2-2g, F=2V-2chi, so N31=N13=2N0-2chiT and **N22=N3-4N0+4chiT** (sphere +8T, torus +0). BUT chi is a
+    topological invariant, dchi=0 under every foliation-preserving move, so **dN22=-4dN0 at fixed (N3,T) holds
+    for EVERY genus**: the differential lock -- the ROOT of the wall -- is topology-INDEPENDENT. Changing slice
+    topology moves only the constant term. So "add spatial vertices without removing (2,2) tets" stays impossible
+    on any closed-surface slice, and N0/f22 are never two independent knobs. Corollary: move weights (2-3:+1,
+    3-2:-1, 2-6/6-2/4-4:0) are UNCHANGED, so cdt_torus_run.py reuses the S^2 Metropolis core VERBATIM -- only the
+    seed (flat torus grid) and the per-slice census (chi=0 + orientability) differ. Verified exact in --selftest.
+25. THE TORUS HUBS TOO (the empirical half). Even though the torus ADMITS a uniform degree-6 flat slice (6chi=0;
+    the sphere FORBIDS it, 6chi=12) and that flat state IS the benchmark, the causal ensemble at the matched
+    baseline (V6000 T12 k0=2 k22=0) equilibrates to hubs deg 15.4/sd 11.0/max 79 -- essentially identical to the
+    S^2 baseline 14.6/10.2/84 -- with d_H(2-6)=1.68 (ratio 0.68) and d_s(8-24)=3.48: the sphere's exact FAILING
+    corner. Hub formation is ENTROPIC (many hubbed triangulations, one flat one), not curvature-forced, hence
+    topology-independent. The k22 lever reproduces the anticorrelation + condensation (k22=1: d_s 3.48->3.27 onto
+    benchmark, d_H 1.68->1.93, CV 0.10->0.22). No joint pass. VERDICT: the 2+1D wall is a property of DIMENSION +
+    diffusion geometry, not of the spatial slice topology.
+26. FLAT CALIBRANT recipe (an in-topology exact benchmark): T identical flat m x n torus grids (uniform deg 6)
+    stacked by the SAME ordered-prism split (lower-vertex->higher-vertex diagonal) the octahedral seed uses --
+    that split is globally consistent for ANY ordered surface triangulation, sphere or torus. Gives an exact flat
+    T^2xS^1 (== flat T^3): f22=1/3 EXACTLY, deg 14 sd 0, census bad=0, and it reproduces Kuhn T^3 d_s/d_H at
+    matched N0 (a second, independent benchmark: d_s 3.10+-0.21, d_H 2.43 vs Kuhn 3.13+-0.18 / 2.47). Always check
+    slice ORIENTABILITY in selftest (chi=0 alone is torus OR Klein bottle; Pachner moves can't flip it, but verify).
+27. STAGE ORDERING, revised by the stage-1 result. TOPOLOGY IS CLOSED: higher genus won't help (lesson 24), so
+    stop varying spatial topology. Remaining escapes are DIMENSIONAL (3+1D CDT, the de Sitter phase reaches 4 in
+    both dims) or NON-LOCAL (a long-range action on the diffusion geometry, not a local per-vertex term). The
+    stage-1 result RE-RANKS 3+1D above the non-local probe: the wall survives every in-2+1D lever incl. topology,
+    which is the evidence to change the DIMENSION rather than keep reshuffling 2+1D.
