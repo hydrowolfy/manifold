@@ -1,0 +1,33 @@
+diff --git a/cdt_causal_run.py b/cdt_causal_run.py
+index 4420e12..ef91389 100644
+--- a/cdt_causal_run.py
++++ b/cdt_causal_run.py
+@@ -544,6 +544,20 @@ def run_chunk(a):
+         if done < a.tune:
+             k3 += min(max((st.N3 - a.V) * 2e-5, -2e-3), 2e-3)
+         done += 1
++    if getattr(a, "grind", False):
++        validate(st, heavy=False)
++        c = link_census(list(st.tets))
++        with open(sf, "wb") as fh:
++            pickle.dump(dict(st=st, k3=k3, done=done, rng=rng), fh)
++        f22 = round(st.nk[2] / max(1, st.N3), 4)
++        rec = dict(kind="grind", k0=a.k0, T=a.T, V=a.V, seed=a.seed, k22=a.k22,
++                   sweeps=done, k3=round(k3, 4), N0=st.N0, N3=st.N3, f22=f22, bad=c["bad"])
++        if a.log:
++            with open(a.log, "a") as fh:
++                fh.write(json.dumps(rec) + "\n")
++        print("GRIND k0=%+.2f T=%d V=%d s%d sweeps=%d k3=%.3f N0=%d N3=%d f22=%.3f bad=%d" %
++              (a.k0, a.T, a.V, a.seed, done, k3, st.N0, st.N3, f22, c["bad"]))
++        return
+     validate(st, heavy=False)
+     m = measure(st)
+     rec = dict(k0=a.k0, T=a.T, V=a.V, eps=a.eps, seed=a.seed, k3=round(k3, 4), sweeps=done,
+@@ -571,6 +585,7 @@ def main():
+     ap.add_argument("--eps", type=float, default=0.002)
+     ap.add_argument("--k22", type=float, default=0.0)
+     ap.add_argument("--measure-long", action="store_true", dest="measure_long")
++    ap.add_argument("--grind", action="store_true", help="fast thermalization: skip d_s/d_H estimators, keep census+save")
+     ap.add_argument("--sweeps", type=int, default=3000)
+     ap.add_argument("--tune", type=int, default=1000)
+     ap.add_argument("--budget-s", type=float, default=30.0, dest="budget_s")
