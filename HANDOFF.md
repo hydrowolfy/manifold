@@ -1,6 +1,6 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
-Updated 2026-07-09, end of the FIFTH campaign (the "frontier" campaign). Work lives in git:
+Updated 2026-07-09, end of the SIXTH campaign (k0 x k22, first with an uncapped local box). Work lives in git:
 branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
 Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_FRONTIER.md` is the
 current closer, `PREREG_CDT_JOINT.md` the preregistration it answers.
@@ -21,8 +21,12 @@ fattest V=24000 aspect is within ~0.17 of benchmark on both -- a weak long-windo
 suggesting the short-window excess is partly a lattice artifact.** Full detail + gate table +
 caveats in REPORT_CDT_FRONTIER.md.
 
-Top untested lever: k0 (the CDT phase). All five campaigns fixed k0=2; alpha's condensation was
-mapped only there. A k0 x k22 scan could in principle suppress the condensation.
+Campaign 6 (REPORT_CDT_K0.md) tested the k0 axis: the WALL HOLDS ACROSS CDT PHASES. f22 (the
+(2,2)-tet fraction) is the order parameter -- both k0(up) and k22(up) push f22 down, which fixes
+d_s but decouples the slices and CONDENSES the volume (CV rises, d_H drops). No (k0,k22) gives
+d_s=benchmark + uniform profile + d_H=benchmark together. Higher k0 makes condensation WORSE.
+Open levers now: a move that raises spatial vertex density WITHOUT removing (2,2) tets (not in
+the standard 2+1D move set), or V >> 24000 to lift d_H at large slice size + mild f22 nudge.
 
 ## 1. Environment (fresh session, Linux sandbox)
 
@@ -50,7 +54,7 @@ unpickle). Every measurement is reproducible from the seeds.
       --budget-s 34 --scratch <dir>/scratch --log <dir>/rec.jsonl
 - `--grind` : fast thermalization -- runs sweeps, keeps census + checkpoint, SKIPS the d_s/d_H
   estimators (~5-6 s/chunk saved). Use for the V=24000 f22 climb; switch to normal chunks near
-  equilibrium (f22 ~0.38). NEW this campaign (see grind.patch).
+  equilibrium (f22 ~0.38). NEW this campaign.
 - `--k22 X` : the CDT asymmetry (coeff on N22). k22>0 penalizes (2,2) tets -> lowers f22, raises
   N0/d_H, lowers d_s, and (crucially) drives profile condensation. Separate scratch dir per k22
   (the checkpoint tag is (k0,T,V,seed) and omits k22 -- collisions otherwise).
@@ -71,8 +75,8 @@ unpickle). Every measurement is reproducible from the seeds.
 
 ## 5. What remains (ranked)
 
-1. k0 x k22 phase scan: does a different CDT phase suppress alpha's condensation and permit a
-   STABLE joint pass? Untested; the highest-value lever.
+1. DONE (campaign 6): k0 x k22 scan -> wall holds across phases; f22 is the order parameter.
+   Next: a spacelike-only refinement move to decouple d_s from f22; or V>>24000 for d_H.
 2. Genuinely thin large-T V=24000 (T~60, s~385) to put a MEASURED d_H at the d_s=benchmark slice
    size at the top volume -- nails the volume-stability of the 0.64 d_H ratio directly.
 3. Measure the de Sitter volume profile of the alpha-condensed states -- physical extended phase
@@ -84,7 +88,11 @@ unpickle). Every measurement is reproducible from the seeds.
 - cdt_causal_run.py : the 2+1D causal CDT implementation + selftest + chunked runner (+ `--grind`).
 - remeasure.py : seed-averaged re-measurement of pickles/tori with error bars + profile CV + degree.
 - euclid_control.py : Euclidean negative control. torus_benchmark.py : exact Kuhn T^3.
-- PREREG_CDT_JOINT.md : campaign-5 preregistration (gate, benchmark, H1/H2/H3, decision rules).
-- REPORT_CDT_FRONTIER.md : campaign-5 verdict (slice-size obstruction; alpha condensation; long-window).
+- PREREG_CDT_JOINT.md / PREREG_CDT_K0.md : campaign-5 / campaign-6 preregistrations.
+- cdt_k0_local.py : SELF-CONTAINED zero-dep (stdlib-only) runner for UNCAPPED local (WSL) runs --
+  physics+estimators bundled verbatim, no networkx; --scan does a k0 x k22 grid, checkpointed/
+  resumable, results.jsonl per snapshot. Verified in-sandbox to reproduce the frozen benchmark.
+- REPORT_CDT_FRONTIER.md : campaign-5 verdict (slice-size obstruction; alpha condensation).
+- REPORT_CDT_K0.md : campaign-6 verdict (wall holds across k0 phases; f22 order parameter).
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
 - LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).
