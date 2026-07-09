@@ -1,7 +1,8 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
 Updated 2026-07-09, SEVENTH campaign + volume-profile side-quest + STAGE 1 (topology; REPORT_CDT_TOPOLOGY.md)
-+ STAGE 2 (exotic / non-local action; REPORT_CDT_ACTION.md) of the frontier. Work lives in git:
++ STAGE 2 (exotic / non-local action; REPORT_CDT_ACTION.md)
++ STAGE 3 (dimensional / 3+1D; REPORT_CDT_4D.md -- the frontier sequence's CLOSER) of the frontier. Work lives in git:
 branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
 Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_HUB.md` is the
 current closer, `PREREG_CDT_HUB.md` the preregistration it answers.
@@ -61,6 +62,23 @@ UNIFORM CV-0.01 hub-free census-clean 3-manifold) drives d_H ABOVE benchmark but
 profile AND degree is still not enough -- the residual walk-confining irregularity of the causal
 1-skeleton is the wall. Six independent lever-families, one wall. The escape is DIMENSIONAL (3+1D).
 
+**STAGE 3 (dimensional; 3+1D; REPORT_CDT_4D.md) is DONE and the WALL IS BROKEN -- the escape was dimensional.**
+The cheap on-paper gate (do 3+1D counts have an analogue of dN22=-4dN0?) answers NO, decisively. Root: a closed
+SURFACE slice has f-vector DOF=1 (2E=3F, V-E+F=chi => F=2V-2chi locks triangles to vertices), but a closed
+3-MANIFOLD slice has f-vector DOF=2 (F=2S, E=V+S leave V AND S=#tets free) -- no 3D analogue of F=2V-2chi. So the
+"more spatial" pentachoron count N41=2 sum_t S_t is NOT locked to N0=sum_t V_t: spatial-vertex density and the
+timelike fraction N32/N4 are TWO INDEPENDENT DOF. Verified (cdt_4d_lock_check.py, all pass): 2+1D identity exact
+on real seeds; the derived closed-4-mfld Dehn-Sommerville relations (N1=3N0+N4/2-3chi, N2=2N0+2N4-2chi, N3=5N4/2)
+hold on dDelta^5 / cross-polytope / CP^2_9 / random stellar S^4's; a real 2-3 Pachner move changes S at fixed V on
+S^3 (the move a surface lacks). Matches the standard 4D CDT action's TWO independent couplings (kappa_0<->N0,
+Delta<->the (4,1)/(3,2) split) and the extended de Sitter phase. BUILD (Part B): the Kuhn T^4 is a validated exact
+flat benchmark (census bad=0, chi=0, DS-exact, degree 30) AND, sliced along one axis, a valid FOLIATED causal state
+-- so the flat JOINT 4-manifold is a genuine census-clean member of the causal ensemble reading d_s~4.1-4.5 (vs the
+T^3 3.13), and cdt4_run.py --selftest validates a foliation-preserving (2,4)/(4,2) Metropolis move (200 exact
+round-trips = DB, 4000-move chain census-clean = manifold preservation). HONEST landing: the DECISIVE result is
+structural (two DOF) + the validated joint-4 calibrant; the full production de Sitter (kappa_0,Delta) sweep needs
+the complete ergodic AJL move set + an uncapped run and is preregistered (PREREG_CDT_4D.md E1), NOT claimed here.
+
 ## 1. Environment (fresh session, Linux sandbox)
 
     git clone https://github.com/hydrowolfy/manifold.git /tmp/m   # or into sandbox home
@@ -82,8 +100,8 @@ unpickle). Every measurement is reproducible from the seeds.
 
 ## 3. Runner + tools (key flags)
 
-    PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \
-      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \
+    PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \\
+      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \\
       --budget-s 34 --scratch <dir>/scratch --log <dir>/rec.jsonl
 - `--grind` : fast thermalization -- runs sweeps, keeps census + checkpoint, SKIPS the d_s/d_H
   estimators (~5-6 s/chunk saved). Use for the V=24000 f22 climb; switch to normal chunks near
@@ -122,6 +140,9 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
    re-weighting. STAGE-3 CHEAP FIRST GATE (do before any heavy build): write the 3+1D Dehn-Sommerville/Euler
    relations among N_{ij}(4,1/3,2/2,3/1,4),N0,N1 and check whether spatial-vertex density and the timelike fraction
    are TWO independent DOF (no 2+1D-style lock dN22=-4dN0). Two free DOF = the a-priori reason 3+1D can win.
+   [RESOLVED 2026-07-09 -- STAGE 3, REPORT_CDT_4D.md: gate answers NO analogue -> PATH OPEN; wall's algebraic root
+   is gone in 3+1D. Remaining: the production de Sitter (kappa_0,Delta) sweep with the full ergodic AJL move set on
+   the uncapped WSL box (PREREG_CDT_4D.md E1) -- build (3,3)+vertex moves onto the validated cdt4_run.py core.]
 3. Measure the de Sitter volume profile of the alpha-condensed / high-sigma states -- physical
    extended phase or a collapse? (Decides how to read the "improvement" in one dimension.)
    [DONE 2026-07-09 -- see 7 below: alpha/d_s = collapse, hub/d_H = extended.]
@@ -153,6 +174,19 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
   counter-term). Per-move deltas verified vs brute force over all 5 moves + reverse-antisymmetric in --selftest.
   Flags --lam-p/--lam-d/--D0d (+ existing --sigma/--k22); checkpoint tag includes all term params (no collisions).
   PREREG_CDT_ACTION.md / REPORT_CDT_ACTION.md : stage-2 prereg + verdict (non-local terms fail; escape is 3+1D).
+- cdt_4d_lock_check.py : STAGE 3 PART A -- the cheap gate, computationally backed. Verifies the 2+1D lock on real
+  seeds, derives+verifies the closed-4-manifold Dehn-Sommerville relations (dDelta^5/cross-polytope/CP^2_9/random
+  stellar S^4), and demonstrates the 3-manifold slice's 2nd DOF (a 2-3 move changes #tets at fixed vertices). Verdict:
+  NO 3+1D analogue of dN22=-4dN0 -> two independent DOF -> path open.
+- cdt4_benchmark.py : exact flat T^4 (Coxeter-Freudenthal-Kuhn) benchmark -- validity (census bad=0, chi=0, DS-exact,
+  degree 30) + estimator calibration (d_s ~4.1-4.5 reads 4D vs T^3 3.13).
+- cdt4_causal.py : foliates Kuhn T^4 along one axis -> validated FOLIATED CAUSAL calibrant (typed pentachora, spatial
+  slices = Kuhn T^3, census-clean); verifies N41=2 sum_t S_t and the two-DOF freedom; measures the calibrant (joint-4).
+- cdt4_run.py : minimal 3+1D causal core (Causal4: pentachora, foliation, census) + foliation-preserving (2,4)/(4,2)
+  Pachner move pair. --selftest: 200 exact round-trips (DB) + 4000-move census-clean chain (manifold preservation).
+  FOUNDATION for the production sweep (NOT yet the full ergodic AJL set: add (3,3)+vertex-changing moves).
+- PREREG_CDT_4D.md / REPORT_CDT_4D.md : stage-3 prereg + verdict (path open; wall's algebraic root gone in 3+1D;
+  joint-4 calibrant validated; production de Sitter sweep preregistered/pending).
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
 - LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).
 

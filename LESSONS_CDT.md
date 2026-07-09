@@ -183,3 +183,43 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     term runs never collide (LESSONS 10). To warm-start a term point from an equilibrated baseline, `cp`
     the baseline pickle onto the target tag's filename, then --chunk with the term: it resumes and re-
     equilibrates. remeasure.py reads frontier3 pickles unchanged (extra sprof attr is harmless).
+
+## STAGE 3 additions (dimensional -- 3+1D; cdt_4d_lock_check.py / cdt4_benchmark.py / cdt4_causal.py / cdt4_run.py)
+35. THE CHEAP GATE ANSWERED: NO 3+1D ANALOGUE OF THE LOCK. The 2+1D wall's root is that a
+    closed SURFACE slice has f-vector DOF = 1 (2E=3F, V-E+F=chi => F=2V-2chi locks the top-
+    simplex count to V). A closed 3-MANIFOLD slice has f-vector DOF = 2 (F=2S, E=V+S leave V
+    AND S=#tets free): there is NO 3D analogue of F=2V-2chi. So N41 = 2 sum_t S_t is NOT locked
+    to N0 = sum_t V_t -- spatial-vertex density and the timelike fraction are TWO independent
+    DOF. dN22=-4dN0 has no 3+1D analogue. Always check a new dimension's SLICE f-vector DOF
+    count first: DOF jumps 1->2 from d=2 to d=3 slices, which is the whole unlock.
+36. 4D DEHN-SOMMERVILLE (derived + census-verified): closed 4-manifold f-vector obeys
+    N3=5N4/2, N1=3N0+N4/2-3chi, N2=2N0+2N4-2chi (2 free params N0,N4 given chi). Verified on
+    dDelta^5, the 5-cross-polytope boundary, CP^2_9 (chi=3), and random 1->5 stellar S^4's.
+    Handy sanity check for any 4D triangulation (the Kuhn T^4 benchmark satisfies it exactly).
+37. THE KUHN T^4 IS A FREE 2-IN-1: the Coxeter-Freudenthal-Kuhn triangulation of (Z/m)^4 is
+    (a) an exact flat 4-torus BENCHMARK -- census bad=0, chi=0, uniform degree 30, DS-exact --
+    AND (b) sliced along one axis, a VALID FOLIATED CAUSAL state (pentachora typed (4,1)/(3,2)/
+    (2,3)/(1,4) 6:6:6:6 per cube, spatial slices = Kuhn T^3). So the flat joint 4-manifold is a
+    genuine member of the causal ensemble (the calibrant), just as the flat T^3 was in 2+1D.
+    Reuse it for both the gate benchmark and the calibrant. (Same trick as LESSONS 26 in 4D.)
+38. ESTIMATOR WINDOWS/SIZE IN 4D. d_s cleanly reads 4D: flat T^4 d_s(8-24)=4.12 (N0=1296) ->
+    4.49 (N0=4096), vs flat T^3 ~3.13 -- d_s is THE discriminating observable (4D vs 3D). d_H
+    carries the SAME large finite-size downward offset as 3D (reads ~2.66-2.84 below 4, as T^3
+    reads ~2.47 below 3) and drifts UP with size; small tori (m<=5) SATURATE (d_H(2-6) 1.6-2.6,
+    ball hits wraparound). Use N0>=~1300 (m>=6) for the benchmark; score d_s vs the finite-size
+    T^4 value, NEVER 4.0 (LESSONS 1). d_H is deterministic on the torus (vertex-transitive, sd 0).
+39. 4D MOVE VALIDATION. Pachner moves preserve PL-manifold type BY THEOREM, so starting from a
+    valid manifold (Kuhn T^4) and applying only legal Pachner flips + the CDT foliation legality
+    (new pentachora must span exactly 2 ADJACENT slices) guarantees manifoldness -- no 3-sphere
+    recognition needed. The 4D (2,4)/(4,2) pair: legality is "edge {a,b} absent" (fwd) / "the 4
+    pentachora around {a,b} are the 4 triangle-cofaces of a re-addable tetrahedron" (inv). Verify
+    DB the 2+1D way: exact round-trips (complex identical after (2,4) then (4,2)), reverse delta =
+    -forward, census bad=0 throughout (cdt4_run.py --selftest: 200 round-trips + a 4000-move chain,
+    all clean). NOTE: (2,4)/(4,2) alone is NOT ergodic -- a production de Sitter sweep needs the
+    full AJL set (add (3,3) + vertex-changing moves). Build/validate those before claiming dynamics.
+40. HONEST STAGE-3 LANDING. The DECISIVE result is structural (Part A: two DOF, exact) + the
+    validated calibrant (joint-4 exists in the ensemble). Do NOT claim "de Sitter reached" from a
+    non-ergodic / under-validated MC -- that violates the program's discipline. The production
+    sweep (full move set, uncapped (kappa_0,Delta) scan) is preregistered (PREREG_CDT_4D.md E1)
+    and pending; its expected landing (WALL BROKEN) is the known 4D CDT de Sitter phase, for which
+    this stage supplies the program's own from-scratch combinatorial WHY.
