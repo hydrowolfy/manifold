@@ -1,6 +1,7 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
-Updated 2026-07-09, end of the SEVENTH campaign (locked identity + hub measure term). Work lives in git:
+Updated 2026-07-09, SEVENTH campaign + volume-profile side-quest + STAGE 1 of the topology frontier
+(torus slices; REPORT_CDT_TOPOLOGY.md). Work lives in git:
 branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
 Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_HUB.md` is the
 current closer, `PREREG_CDT_HUB.md` the preregistration it answers.
@@ -37,6 +38,15 @@ aspect ratio (c5), the whole k0 x k22 plane (c6), AND a degree-measure term (c7)
 one wall. Remaining escapes all LEAVE the 2+1D S^2 x S^1 alpha=1 ensemble (different spatial topology which
 breaks F=2V-4; 3+1D CDT; a non-local action term). Only in-ensemble item still open: V >> 24000 to lift d_H
 at large slice size -- a slow, likely-futile extrapolation per c5.
+
+**STAGE 1 (topology frontier; REPORT_CDT_TOPOLOGY.md) is DONE and the wall REAPPEARS -- the obstruction is
+TOPOLOGY-INDEPENDENT.** Making each slice a 2-TORUS (chi=0, dissolving F=2V-4) generalizes the identity to
+N22 = N3 - 4 N0 + 4 chi T (torus: N22 = N3 - 4 N0), but dchi=0 under every move, so the DIFFERENTIAL lock
+dN22 = -4 dN0 survives at every genus -- only the constant offset moves. The causal T^2xS^1 ensemble at the
+matched baseline (V6000 T12 k0=2) equilibrates to the sphere's exact failing corner (hubs deg_max 79 vs the
+flat 14, d_H(2-6)=1.68 ratio 0.68, d_s(8-24)=3.48), and the k22 lever reproduces the same anticorrelation +
+condensation. The flat joint 3-manifold EXISTS in the ensemble (an exact calibrant, == the benchmark) but has
+negligible entropic weight. So the wall is a property of DIMENSION + diffusion geometry, not the slice sphere.
 
 ## 1. Environment (fresh session, Linux sandbox)
 
@@ -90,9 +100,12 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
    lever by scan (reparameterizes the same tradeoff). The remaining in-ensemble item: genuinely thin
    large-T V>>24000 (s~385 at large volume) to put a MEASURED d_H at the d_s=benchmark slice size --
    the campaign-5 extrapolation says the miss only shrinks slowly (likely futile, but unmeasured).
-2. Out-of-ensemble questions (each answers something DIFFERENT, not the S^2 x S^1 alpha=1 wall):
-   different spatial slice topology (breaks the F=2V-4 identity), 3+1D CDT (has the de Sitter phase),
-   or a non-local action term.
+2. Out-of-ensemble questions. Spatial slice topology is now CLOSED by STAGE 1 (REPORT_CDT_TOPOLOGY.md):
+   the torus (chi=0) breaks F=2V-4 but the differential lock dN22=-4dN0 is topology-independent and the ensemble
+   hubs anyway -> wall reappears; higher genus cannot help. The two remaining escapes, RE-RANKED by stage 1:
+   (a) STAGE 3, 3+1D CDT (the de Sitter phase reaches 4 in both dims) -- now the BEST-motivated next step, because
+   stage 1 shows the escape must be DIMENSIONAL, not topological; (b) STAGE 2, a genuinely NON-LOCAL action term
+   on the diffusion geometry (a cautious probe -- four local/structural levers incl. topology have now failed).
 3. Measure the de Sitter volume profile of the alpha-condensed / high-sigma states -- physical
    extended phase or a collapse? (Decides how to read the "improvement" in one dimension.)
    [DONE 2026-07-09 -- see 7 below: alpha/d_s = collapse, hub/d_H = extended.]
@@ -115,6 +128,10 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
 - PREREG_CDT_HUB.md / REPORT_CDT_HUB.md : campaign-7 prereg + verdict (locked identity impossibility proof;
   hub measure term reparameterizes the same d_H-d_s tradeoff -> wall holds outside the standard move set).
 - PREREG_CDT_PROFILE.md / REPORT_CDT_PROFILE.md : volume-profile side-quest prereg + verdict (item #3).
+- cdt_torus_run.py : STAGE 1 runner = cdt_causal_run.py core VERBATIM + flat-torus seed + chi=0/orientability
+  census (T^2 x S^1). --selftest (identity + round-trips + orientable-torus census), --calibrant (exact flat
+  T^3), --chunk/--measure-long (seed-averaged). PREREG_CDT_TOPOLOGY.md / REPORT_CDT_TOPOLOGY.md : stage-1
+  prereg + verdict (wall is topology-independent; proceed to stage 3).
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
 - LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).
 
@@ -127,3 +144,19 @@ rising, blob-with-stalk, K1+K2+K3) is a COLLAPSE; the hub sigma=0.10 state where
 no stalk, extended across 11/12 slices, stable) is a GENUINE PHYSICAL EXTENDED phase. So the d_s/alpha
 "improvement" is a condensation artifact (not a real 3-manifold); the d_H/hub near-miss is the physically
 meaningful one. Added profile_dump.py (read-only N3(t) + preregistered shape stats).
+
+## 8. STAGE 1 (topology frontier) resolved (2026-07-09)
+
+Surgical stage of the frontier sequence surgical -> exotic -> 3+1D. Broke the sphere assumption by making each
+spatial slice a 2-TORUS (manifold T^2 x S^1, which is the flat-T^3 topology foliated along one circle).
+Preregistered in PREREG_CDT_TOPOLOGY.md (committed first). Runner cdt_torus_run.py reuses the S^2 Metropolis
+core verbatim (only the seed + census change; move weights are provably unchanged). VERDICT: **wall reappears,
+H_wall supported.** Two results: (1) analytical/exact -- the locking identity generalizes to N22=N3-4N0+4chiT
+and its DIFFERENTIAL dN22=-4dN0 is topology-independent (dchi=0), so the "new move" escape stays impossible and
+N0/f22 remain one locked DOF for any genus; (2) empirical -- the causal ensemble still forms hubs (deg_max 79,
+== the sphere's 84) and fails the joint gate identically (baseline d_H 1.68 / d_s 3.48), the k22 lever reproduces
+the anticorrelation + condensation, and the exact flat calibrant (the joint 3-manifold, == benchmark) exists in
+the ensemble but is entropically unselected. RECOMMENDATION: topology is closed; **proceed to STAGE 3 (3+1D)** as
+primary (the escape is dimensional), keep STAGE 2 (non-local action) as a secondary in-2+1D probe. A larger-V /
+full seed-averaged anticorrelation scan on the uncapped WSL box is the optional confirmation; the verdict (the
+exact identity) does not depend on it.
