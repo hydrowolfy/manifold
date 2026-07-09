@@ -95,12 +95,14 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
    or a non-local action term.
 3. Measure the de Sitter volume profile of the alpha-condensed / high-sigma states -- physical
    extended phase or a collapse? (Decides how to read the "improvement" in one dimension.)
+   [DONE 2026-07-09 -- see 7 below: alpha/d_s = collapse, hub/d_H = extended.]
 4. Euclid control at matched large size (negative-control arm above n0<=500).
 
 ## 6. File inventory (branch causal-cdt-scaling)
 
 - cdt_causal_run.py : the 2+1D causal CDT implementation + selftest + chunked runner (+ `--grind`).
 - remeasure.py : seed-averaged re-measurement of pickles/tori with error bars + profile CV + degree.
+- profile_dump.py : read-only per-time-slice N3(t) volume-profile dumper + shape stats (side-quest 7).
 - euclid_control.py : Euclidean negative control. torus_benchmark.py : exact Kuhn T^3.
 - PREREG_CDT_JOINT.md / PREREG_CDT_K0.md : campaign-5 / campaign-6 preregistrations.
 - cdt_k0_local.py : SELF-CONTAINED zero-dep (stdlib-only) runner for UNCAPPED local (WSL) runs --
@@ -112,5 +114,16 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
   term sigma*sum_v max(0,deg-D0)^2 (deg cache maintained incrementally; DB + manifold verified in selftest).
 - PREREG_CDT_HUB.md / REPORT_CDT_HUB.md : campaign-7 prereg + verdict (locked identity impossibility proof;
   hub measure term reparameterizes the same d_H-d_s tradeoff -> wall holds outside the standard move set).
+- PREREG_CDT_PROFILE.md / REPORT_CDT_PROFILE.md : volume-profile side-quest prereg + verdict (item #3).
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
 - LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).
+
+## 7. Volume-profile side-quest resolved (2026-07-09)
+
+Open item #3 (§5) DONE. Measured the per-time-slice spatial-volume profile N3(t) at the near-misses
+(preregistered in PREREG_CDT_PROFILE.md, committed first; verdict in REPORT_CDT_PROFILE.md). The two
+near-misses differ in KIND: the alpha/k22 state where d_s hits benchmark (k0=6 V6000 T12; CV 0.68->0.99
+rising, blob-with-stalk, K1+K2+K3) is a COLLAPSE; the hub sigma=0.10 state where d_H passes (CV 0.24,
+no stalk, extended across 11/12 slices, stable) is a GENUINE PHYSICAL EXTENDED phase. So the d_s/alpha
+"improvement" is a condensation artifact (not a real 3-manifold); the d_H/hub near-miss is the physically
+meaningful one. Added profile_dump.py (read-only N3(t) + preregistered shape stats).
