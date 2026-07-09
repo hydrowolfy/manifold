@@ -223,3 +223,43 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     sweep (full move set, uncapped (kappa_0,Delta) scan) is preregistered (PREREG_CDT_4D.md E1)
     and pending; its expected landing (WALL BROKEN) is the known 4D CDT de Sitter phase, for which
     this stage supplies the program's own from-scratch combinatorial WHY.
+
+## STAGE 3 PART C additions (production machinery: full move set + Metropolis; cdt4_prod.py / cdt4_scan.py)
+41. THE FULL ERGODIC 4D MOVE SET, built on cdt4_run.py: (2,4)/(4,2) [dN0=0,dN4=+-2], (3,3)
+    [self-inverse, dN4=0], (4,6)/(6,4) [spatial (2,3) flip thru both sandwiches, dN4=+-2,dN0=0],
+    (2,8)/(8,2) [spatial-tet vertex insert/remove, dN0=+-1,dN4=+-6]. (2,8) is the 4D LIFT of the
+    2+1D (2,6): insert a vertex at a SPATIAL tetrahedron's centre (split into 4) -> the 2 pentachora
+    above/below become 8. It is the operational N0 DOF Part A proved independent. Validate EXACTLY as
+    2+1D: forward+reverse = byte-identical complex, reverse dS = -forward, census bad=0/untyped=0 per
+    step (cdt4_prod_selftest.py). All four families pass; a 1500-move mixed chain stays census-clean.
+42. METROPOLIS DETAILED BALANCE with a vertex-changing move needs the move-count Jacobian:
+    A = min(1, (K_fwd/K_rev) exp(-dS)), K = live count of the pick-primitive (tet for 24, edge for
+    42, triangle for 33, spatial-tri for 46, spatial-edge for 64, spatial-tet for 28, VERTEX for 82).
+    Uniform move-type selection makes reverse-pair proposal probs cancel. VERIFY by the balance
+    equation directly: (1/K_f) A_f exp(-S) == (1/K_r) A_r exp(-S') -- held to 0.00e+00 over 828
+    (move,state) pairs at random couplings (cdt4_scan.py --db-check). This is the gold-standard DB
+    check; do it before trusting any run. Action: S = -(k0+6D)N0 + k4 N4 + D(2 N41 + N32) + eps(N4-N4t)^2.
+43. FINITE-SIZE ESTIMATOR SATURATION IS SHARP IN 4D (re-confirming LESSONS 38). At N0=256 (m=4) the
+    referee reads d_s(8-24)~2.46, d_H(2-6)~0.59 -- these are SATURATION ARTIFACTS (ball hits T=4
+    wraparound), NOT dimensions. A gate-quality read of the 4D signal needs N0 >~ 1296 (m>=6). Any
+    de Sitter scan MUST run at N4 large enough that equilibrium N0 clears ~1300, or the d_s/d_H
+    numbers are meaningless. Score vs the finite-size T^4 benchmark at the SAME N0, never 4.0.
+44. N0 IS A SLOW COLLECTIVE MODE AT FIXED N4 (the 4D thermalization bottleneck). The ONLY N0-changing
+    move is (2,8)/(8,2), whose dN4=+-6 is opposed by the volume term eps(N4-N4t)^2 -- so growing N0 at
+    fixed N4 needs (2,8)+3x(4,2) composites and equilibrates slowly. From the (uniform) flat seed, ~30
+    sweeps barely move N0 or the profile CV (0.002). This is intrinsic 4D CDT critical slowing, not a
+    bug; budget long thermalization (10^3-10^4+ sweeps) on the uncapped box. Loose eps lets N0 move but
+    conflates volume; tight eps fixes volume but slows N0. Consider annealing eps, or a DB-correct
+    composite fixed-N4 vertex move, to speed it up.
+45. IMPLEMENTATION FOR SPEED: indexed-sets (list+pos dict) give O(1) uniform pick AND exact live count
+    (the DB K-factors); incidence maps v2p (vertex->pents), tri2tet, edge2tet give O(local) move
+    legality instead of O(N4) scans (prop_42/33/82 were O(N4) without them -> selftest timed out).
+    GUARD every counter against a from-scratch recount() after moves (caught nothing once it was right,
+    but it is the cheap insurance that the DB factors are exact).
+46. SANDBOX ENGINEERING (cost 2 calls): a bash heredoc write of a large file was SILENTLY CLOBBERED by
+    workspace contention (a prior timed-out call), leaving the OLD file -- grep the new file for a
+    signature token (e.g. 'IdxSet') to confirm the write landed BEFORE running. And keep the 45s wall
+    cap in mind: full census()/recount() are O(N4); calling them twice per round-trip across 4 move
+    families blows the cap -- check census per step but recount once per family, and run python3 -u for
+    flushed progress. Bundle for WSL = cdt4_prod.py + cdt4_scan.py (stdlib only, no networkx: the two
+    estimators need only random/math/collections); re-verify the bundle STANDALONE from the staged dir.
