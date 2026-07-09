@@ -1,9 +1,9 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
-Updated 2026-07-09, end of the SIXTH campaign (k0 x k22, first with an uncapped local box). Work lives in git:
+Updated 2026-07-09, end of the SEVENTH campaign (locked identity + hub measure term). Work lives in git:
 branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
-Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_FRONTIER.md` is the
-current closer, `PREREG_CDT_JOINT.md` the preregistration it answers.
+Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_HUB.md` is the
+current closer, `PREREG_CDT_HUB.md` the preregistration it answers.
 
 ## 0. Bottom line so far
 
@@ -25,8 +25,18 @@ Campaign 6 (REPORT_CDT_K0.md) tested the k0 axis: the WALL HOLDS ACROSS CDT PHAS
 (2,2)-tet fraction) is the order parameter -- both k0(up) and k22(up) push f22 down, which fixes
 d_s but decouples the slices and CONDENSES the volume (CV rises, d_H drops). No (k0,k22) gives
 d_s=benchmark + uniform profile + d_H=benchmark together. Higher k0 makes condensation WORSE.
-Open levers now: a move that raises spatial vertex density WITHOUT removing (2,2) tets (not in
-the standard 2+1D move set), or V >> 24000 to lift d_H at large slice size + mild f22 nudge.
+Campaign 7 (REPORT_CDT_HUB.md) CLOSES the first of those levers BY PROOF. The per-slice Euler identity
+N22 = N3 - 4 N0 + 8 T (verified exact) locks spatial-vertex density to f22 -- at fixed N3,T, dN22 = -4 dN0
+-- so a move that adds spatial vertices WITHOUT removing (2,2) tets is COMBINATORIALLY IMPOSSIBLE (no
+foliation-preserving move escapes a topological identity). The only freedom left at fixed simplex counts is
+the degree DISTRIBUTION (causal hubs deg<=84 vs the torus's uniform 14). A detailed-balance-safe, manifold-
+preserving hub-suppression measure term S += sigma*sum_v max(0,deg-D0)^2 (cdt_frontier2_run.py) moves BOTH
+dimensions but REPARAMETERIZES THE SAME TRADEOFF: d_s(8-24) falls and d_H(2-6) rises monotonically with
+sigma, crossing the benchmark ~10x apart in sigma -- no joint pass at any sigma. The wall now survives
+aspect ratio (c5), the whole k0 x k22 plane (c6), AND a degree-measure term (c7): three independent levers,
+one wall. Remaining escapes all LEAVE the 2+1D S^2 x S^1 alpha=1 ensemble (different spatial topology which
+breaks F=2V-4; 3+1D CDT; a non-local action term). Only in-ensemble item still open: V >> 24000 to lift d_H
+at large slice size -- a slow, likely-futile extrapolation per c5.
 
 ## 1. Environment (fresh session, Linux sandbox)
 
@@ -71,16 +81,20 @@ unpickle). Every measurement is reproducible from the seeds.
 
 ~8 sweeps/s @ V6000, ~2.3-3/s @ V12000, ~1.1/s @ V24000 (pair). V=24000 fresh thermalization is
 ~18-20 chunk-pairs (grow leaves f22~0.03, must climb to ~0.38). alpha warm-start re-equilibration
-~1000-2000 sweeps. Benchmark m<=16 remeasure with 8 seeds is a few seconds.
+~1000-2000 sweeps. Benchmark m<=16 remeasure with 8 seeds is a few seconds. Campaign 7 hub-term
+warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV).
 
 ## 5. What remains (ranked)
 
-1. DONE (campaign 6): k0 x k22 scan -> wall holds across phases; f22 is the order parameter.
-   Next: a spacelike-only refinement move to decouple d_s from f22; or V>>24000 for d_H.
-2. Genuinely thin large-T V=24000 (T~60, s~385) to put a MEASURED d_H at the d_s=benchmark slice
-   size at the top volume -- nails the volume-stability of the 0.64 d_H ratio directly.
-3. Measure the de Sitter volume profile of the alpha-condensed states -- physical extended phase
-   or a collapse? (Decides how to read the alpha "improvement".)
+1. Campaign 7 CLOSED the "new move" lever by proof (the locked identity) and the hub/measure-term
+   lever by scan (reparameterizes the same tradeoff). The remaining in-ensemble item: genuinely thin
+   large-T V>>24000 (s~385 at large volume) to put a MEASURED d_H at the d_s=benchmark slice size --
+   the campaign-5 extrapolation says the miss only shrinks slowly (likely futile, but unmeasured).
+2. Out-of-ensemble questions (each answers something DIFFERENT, not the S^2 x S^1 alpha=1 wall):
+   different spatial slice topology (breaks the F=2V-4 identity), 3+1D CDT (has the de Sitter phase),
+   or a non-local action term.
+3. Measure the de Sitter volume profile of the alpha-condensed / high-sigma states -- physical
+   extended phase or a collapse? (Decides how to read the "improvement" in one dimension.)
 4. Euclid control at matched large size (negative-control arm above n0<=500).
 
 ## 6. File inventory (branch causal-cdt-scaling)
@@ -94,5 +108,9 @@ unpickle). Every measurement is reproducible from the seeds.
   resumable, results.jsonl per snapshot. Verified in-sandbox to reproduce the frozen benchmark.
 - REPORT_CDT_FRONTIER.md : campaign-5 verdict (slice-size obstruction; alpha condensation).
 - REPORT_CDT_K0.md : campaign-6 verdict (wall holds across k0 phases; f22 order parameter).
+- cdt_frontier2_run.py : campaign-7 runner = cdt_causal_run.py core VERBATIM + a hub-suppression measure
+  term sigma*sum_v max(0,deg-D0)^2 (deg cache maintained incrementally; DB + manifold verified in selftest).
+- PREREG_CDT_HUB.md / REPORT_CDT_HUB.md : campaign-7 prereg + verdict (locked identity impossibility proof;
+  hub measure term reparameterizes the same d_H-d_s tradeoff -> wall holds outside the standard move set).
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
 - LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).

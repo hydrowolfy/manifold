@@ -82,3 +82,30 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     kills its own launcher -- kill instead with `bash kill.sh` where kill.sh greps a pattern NOT
     in the bash cmdline (e.g. a unique arg like 'equil 2000'). (c) mkdir the outdir BEFORE the
     `> out/run.log` redirect or the shell redirect fails and python never starts.
+
+## Campaign 7 additions (the locked identity + hub measure term)
+18. THE LOCKED IDENTITY (the big one). Per-slice Euler on the S^2 slices (F = 2V - 4) forces, for the
+    WHOLE foliated complex: N31 = N13 = 2 N0 - 4 T and **N22 = N3 - 4 N0 + 8 T**, i.e.
+    f22 = 1 - 4 (N0 - 2 T) / N3. Verified EXACT to the integer on seed/grown/thermalized states (k0=2,5)
+    and it reproduces the campaign-6 k0-map f22 from (N0,N3,T). Consequence: at fixed volume and T,
+    dN22 = -4 dN0. Spatial-vertex density and the (2,2) fraction are ONE locked DOF. So "add spatial
+    vertices WITHOUT removing (2,2) tets" is COMBINATORIALLY IMPOSSIBLE -- no move (standard or exotic)
+    escapes it, because every foliation-preserving local move preserves the identity. Check any proposed
+    escape against this identity FIRST; it kills the whole "new move" branch by proof.
+19. THE ONLY FREEDOM LEFT AT FIXED COUNTS IS THE DEGREE DISTRIBUTION. The identity pins simplex counts
+    and the mean degree (sum_v deg = 2 N1 = 2(N0+N3)); the variance is free. Causal states have hubs
+    (deg max ~84, sd ~10) absent in the regular torus (14, sd 0). The hub-suppression measure term
+    S += sigma * sum_v max(0, deg_v - D0)^2 is the sole non-excluded lever. It is DB-safe (state
+    function; proposals unchanged; per-move delta == brute-force; reverse delta = -forward) and manifold-
+    preserving (census bad=0). But it REPARAMETERIZES THE SAME TRADEOFF: d_s(8-24) falls and d_H(2-6)
+    rises monotonically with sigma, crossing the benchmark ~10x apart in sigma (d_s at ~0.007, d_H at
+    ~0.08). No sigma passes G2+G3. Powerful lever, same wall. (Implementation: cdt_frontier2_run.py.)
+20. HUBS SET BOTH DIMS OPPOSITELY: they saturate ball growth (d_H low) AND add walk shortcuts (d_s high);
+    removing them de-saturates d_H up and confines the walk so d_s falls THROUGH the benchmark. This is
+    the campaign-5/6 d_H-d_s anticorrelation reproduced by a third independent knob -- it is a property of
+    the ensemble's diffusion geometry, not of any one coupling.
+21. RESUME-COMPAT: cdt_frontier2_run.py rebuilds the deg cache from st.ecnt on load, so pre-campaign-7
+    pickles resume cleanly. Pickles from a `python3 script.py` run store class as __main__.Causal and
+    unpickle as whatever __main__ currently is (frontier2 instance gains the new methods; state migrates).
+22. ENGINEERING (re-learned, cost one call): do NOT loop two budgeted --chunk runs in one bash call --
+    the 45 s wall cap kills the second and times out the whole call (lesson 8). One chunk per call.
