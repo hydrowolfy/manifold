@@ -1,7 +1,7 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
-Updated 2026-07-09, SEVENTH campaign + volume-profile side-quest + STAGE 1 of the topology frontier
-(torus slices; REPORT_CDT_TOPOLOGY.md). Work lives in git:
+Updated 2026-07-09, SEVENTH campaign + volume-profile side-quest + STAGE 1 (topology; REPORT_CDT_TOPOLOGY.md)
++ STAGE 2 (exotic / non-local action; REPORT_CDT_ACTION.md) of the frontier. Work lives in git:
 branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
 Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_HUB.md` is the
 current closer, `PREREG_CDT_HUB.md` the preregistration it answers.
@@ -47,6 +47,19 @@ matched baseline (V6000 T12 k0=2) equilibrates to the sphere's exact failing cor
 flat 14, d_H(2-6)=1.68 ratio 0.68, d_s(8-24)=3.48), and the k22 lever reproduces the same anticorrelation +
 condensation. The flat joint 3-manifold EXISTS in the ensemble (an exact calibrant, == the benchmark) but has
 negligible entropic weight. So the wall is a property of DIMENSION + diffusion geometry, not the slice sphere.
+
+**STAGE 2 (exotic / non-local action; REPORT_CDT_ACTION.md) is DONE and the wall SURVIVES -- the last
+in-2+1D escape is CLOSED.** Two non-local measure terms were built (DB + manifold verified by brute
+force over all 5 moves): NL-P lam_p*sum_t(n(t)-nbar)^2 (non-separable profile-uniformity) and NL-D
+lam_d*sum_v(deg_v-14)^2 (symmetric global degree counter-term, stronger than c7's one-sided cap). NL-P
+is ORTHOGONAL to the wall (drives profile CV 0.25->0.01, even de-condenses k22, but leaves d_s/d_H
+unchanged on the baseline): the wall is not in the profile. NL-D REPARAMETERIZES the same tradeoff --
+d_H saturates at ratio ~0.85 (below the 0.90 gate) while d_s collapses -- matching the flat degree
+delta is necessary but not sufficient. The strongest combined lever (k22 + NL-P + hub cap = a PERFECTLY
+UNIFORM CV-0.01 hub-free census-clean 3-manifold) drives d_H ABOVE benchmark but d_s collapses to
+~2.0-2.2; the needle (d_H>=0.90 AND d_s in band) is unthreadable. So reproducing the flat manifold's
+profile AND degree is still not enough -- the residual walk-confining irregularity of the causal
+1-skeleton is the wall. Six independent lever-families, one wall. The escape is DIMENSIONAL (3+1D).
 
 ## 1. Environment (fresh session, Linux sandbox)
 
@@ -103,9 +116,12 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
 2. Out-of-ensemble questions. Spatial slice topology is now CLOSED by STAGE 1 (REPORT_CDT_TOPOLOGY.md):
    the torus (chi=0) breaks F=2V-4 but the differential lock dN22=-4dN0 is topology-independent and the ensemble
    hubs anyway -> wall reappears; higher genus cannot help. The two remaining escapes, RE-RANKED by stage 1:
-   (a) STAGE 3, 3+1D CDT (the de Sitter phase reaches 4 in both dims) -- now the BEST-motivated next step, because
-   stage 1 shows the escape must be DIMENSIONAL, not topological; (b) STAGE 2, a genuinely NON-LOCAL action term
-   on the diffusion geometry (a cautious probe -- four local/structural levers incl. topology have now failed).
+   (a) STAGE 3, 3+1D CDT (the de Sitter phase reaches 4 in both dims) -- now the SOLE remaining escape and the
+   primary next step, because stages 1-2 show the escape must be DIMENSIONAL; (b) STAGE 2 (non-local action) is
+   now CLOSED (REPORT_CDT_ACTION.md): NL-P profile + NL-D degree counter-terms fail; the wall survives a non-local
+   re-weighting. STAGE-3 CHEAP FIRST GATE (do before any heavy build): write the 3+1D Dehn-Sommerville/Euler
+   relations among N_{ij}(4,1/3,2/2,3/1,4),N0,N1 and check whether spatial-vertex density and the timelike fraction
+   are TWO independent DOF (no 2+1D-style lock dN22=-4dN0). Two free DOF = the a-priori reason 3+1D can win.
 3. Measure the de Sitter volume profile of the alpha-condensed / high-sigma states -- physical
    extended phase or a collapse? (Decides how to read the "improvement" in one dimension.)
    [DONE 2026-07-09 -- see 7 below: alpha/d_s = collapse, hub/d_H = extended.]
@@ -132,6 +148,11 @@ warm-start re-equilibration at V6000 is fast (~400-600 sweeps to a stable f22/CV
   census (T^2 x S^1). --selftest (identity + round-trips + orientable-torus census), --calibrant (exact flat
   T^3), --chunk/--measure-long (seed-averaged). PREREG_CDT_TOPOLOGY.md / REPORT_CDT_TOPOLOGY.md : stage-1
   prereg + verdict (wall is topology-independent; proceed to stage 3).
+- cdt_frontier3_run.py : STAGE 2 runner = cdt_frontier2_run.py core VERBATIM + two NON-LOCAL terms: NL-P
+  lam_p*sum_t(n(t)-nbar)^2 (profile-uniformity, sprof cache) and NL-D lam_d*sum_v(deg-D0d)^2 (symmetric degree
+  counter-term). Per-move deltas verified vs brute force over all 5 moves + reverse-antisymmetric in --selftest.
+  Flags --lam-p/--lam-d/--D0d (+ existing --sigma/--k22); checkpoint tag includes all term params (no collisions).
+  PREREG_CDT_ACTION.md / REPORT_CDT_ACTION.md : stage-2 prereg + verdict (non-local terms fail; escape is 3+1D).
 - REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
 - LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).
 

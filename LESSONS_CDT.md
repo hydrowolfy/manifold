@@ -147,3 +147,39 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     both dims) or NON-LOCAL (a long-range action on the diffusion geometry, not a local per-vertex term). The
     stage-1 result RE-RANKS 3+1D above the non-local probe: the wall survives every in-2+1D lever incl. topology,
     which is the evidence to change the DIMENSION rather than keep reshuffling 2+1D.
+
+## STAGE 2 additions (exotic -- non-local action/measure terms; cdt_frontier3_run.py)
+28. NON-LOCAL != escapes the wall. Two non-local terms were tried and BOTH fail: (NL-P) profile-
+    uniformity lam_p*sum_t(n(t)-nbar)^2 -- non-separable across the foliation -- and (NL-D) a symmetric
+    global degree counter-term lam_d*sum_v(deg_v-14)^2 driving the FULL degree distribution to the flat
+    delta (stronger than c7's one-sided cap). The d_H-d_s wall is a 6th independent lever-family it now
+    survives (after aspect, k0xk22, hub cap, topology). Register the same prior for any further in-2+1D term.
+29. THE PROFILE IS ORTHOGONAL TO THE WALL. NL-P drives profile CV 0.25 -> 0.01 (razor-uniform tube) and
+    does NOTHING to d_s/d_H on the extended baseline (3.30->3.42, ratio 0.707->0.712). The wall lives in
+    the DEGREE / diffusion geometry, not the spatial-volume profile. Corollary win: NL-P DE-CONDENSES the
+    k22 lever (k22=1.0 alone CV->~1 collapse; k22=1.0 + NL-P CV 0.01) -- so you can now hold a uniform
+    profile at low f22. Useful, but it does not open the gate (d_H stays low where the profile is uniform).
+30. MATCHING THE FLAT DEGREE SIGNATURE IS NECESSARY, NOT SUFFICIENT. NL-D forces deg->14 everywhere but
+    d_H SATURATES at ratio ~0.85 (below the 0.90 gate) while d_s collapses (3.30->2.75). It is even worse
+    than c7's one-sided cap for d_H, because forcing UNDER-connected vertices UP to 14 re-adds short-range
+    connectivity that re-saturates ball growth. Uniform-degree-14 causal triangulations are exponentially
+    many and walk-confining; the flat lattice is one microstate. Degree uniformity is not lattice regularity.
+31. THE STRONGEST COMBINED LEVER STILL FAILS -- and it is the cleanest statement of the wall. k22 (lower
+    f22) + NL-P (uniform profile) + a hub cap (remove hubs) = a PERFECTLY UNIFORM (CV 0.01), census-clean,
+    hub-suppressed 3-manifold -- the closest structural match to the flat calibrant any lever set produces.
+    It drives d_H ABOVE benchmark (ratio 1.05-1.07) while d_s COLLAPSES to ~2.0-2.2. Sweeping the hub cap
+    0->0.05: d_H 0.85->1.07, d_s 3.03->2.05; at the sigma where d_H=0.90, d_s~2.8 (below the G3 floor).
+    The needle is unthreadable. Reproducing the flat manifold's profile AND degree is not enough: the
+    residual walk-confining IRREGULARITY of the causal 1-skeleton (beyond profile and degree) is the wall.
+32. THE ESCAPE IS DIMENSIONAL -- and stage 3 has a CHEAP first gate. Before any 3+1D Metropolis build,
+    write down the 3+1D Dehn-Sommerville / Euler relations among N_{ij}(4,1/3,2/2,3/1,4), N0, N1 and check
+    whether they leave spatial-vertex density and the timelike-simplex fraction as TWO independent DOF (no
+    2+1D-style single lock dN22=-4dN0). If yes, that is the a-priori reason 3+1D reaches 4 in both dims; if
+    an analogous lock appears, it reshapes the program. Checkable on paper / a tiny seed census first.
+33. ENGINEERING (re-learned, cost one call): still ONE budgeted --chunk per bash call (LESSONS 8/22). Also:
+    the mounted-outputs Edit tool truncated a large file mid-write once -- author repo files via bash
+    heredoc in the sandbox-local clone, not via the mount, and wc -l / tail to verify before running.
+34. WARM-START BY TAG-COPY. cdt_frontier3_run.py's checkpoint tag now includes (sigma,lam_d,lam_p,k22) so
+    term runs never collide (LESSONS 10). To warm-start a term point from an equilibrated baseline, `cp`
+    the baseline pickle onto the target tag's filename, then --chunk with the term: it resumes and re-
+    equilibrates. remeasure.py reads frontier3 pickles unchanged (extra sprof attr is harmless).
