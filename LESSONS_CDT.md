@@ -38,7 +38,7 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
    survive; the interrupted one is lost but the pickle is intact).
 9. USE `--grind` for V=24000 thermalization: it skips the d_s/d_H estimators (the ~5-6 s/chunk
    cost) and keeps census+checkpoint, ~1.5x more sweeps/chunk. Switch to normal chunks + an
-   8-seed `remeasure.py` pass only once f22 is near its ~0.38 equilibrium. (Patch: grind.patch.)
+   8-seed `remeasure.py` pass only once f22 is near its ~0.38 equilibrium.
 10. V=24000 thermalization is inherently ~18-20 chunk-pairs: fresh growth leaves f22~0.03 and it
     must climb to ~0.38, rate-limited by (2,3)-move acceptance. Budget for it. Checkpoint every
     chunk; the tag is (k0,T,V,seed) -- ADD k22 (or a separate scratch dir) when scanning k22, or
@@ -48,9 +48,9 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     against it vanishing) -- they resume exactly if `cdt_causal_run.py` is byte-identical (it is
     on the branch). This saved regenerating every campaign-4 state this campaign.
 12. GIT DOES NOT WORK on the mounted outputs dir (unlink/lock EPERM). Clone into the sandbox-
-    local home and commit via the GitHub connector (git push has no creds). Keep pickles (*.pkl),
-    the tarball, and the floats jsonl OUT of git (.gitignore); commit code/text only. Never
-    hand-relay the dense-float jsonl through the connector (not byte-exact).
+    local home (/sessions/.../work_manifold) and commit via the GitHub connector. Keep pickles
+    (*.pkl), the tarball, and the floats jsonl OUT of git (.gitignore); commit code/text only.
+    Never hand-relay the dense-float jsonl through the connector (not byte-exact).
 
 ## Discipline
 13. PREREGISTER the gate, windows, benchmark, and hypotheses BEFORE the new experiment; commit
@@ -59,3 +59,26 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
 14. A "joint pass" needs: census bad=0, equilibrium (not a transient), seed-averaged error bars,
     AND a stable profile. Report profile CV alongside d_H/d_s -- a d_H gain that rides rising CV
     is condensation, not 3-manifold convergence.
+
+## Campaign 6 additions (k0 x k22)
+15. f22 IS THE ORDER PARAMETER of the d_H-d_s tradeoff. The (2,2) tets are the timelike tissue
+    stitching adjacent spatial slices. High f22 -> uniform profile but d_s too high; low f22 ->
+    d_s onto benchmark but slices decouple and the volume CONDENSES (and d_H drops). BOTH k0(up)
+    and k22(up) push f22 down, so they are the SAME lever, not independent phases. Equilibrium f22
+    at V6k T12: k0=2->0.40, k0=3->0.31, k0=4->0.21, k0=6->0.03. No k0 escapes the tradeoff.
+16. HIGHER k0 DOES NOT SUPPRESS CONDENSATION -- it worsens it (CV rises with k0: 0.16/0.37/0.33/
+    0.76/1.21 for k0=2/3/4/6/6+a1.5). Score condensation by CV DRIFT + collapsing MIN slice (110
+    ->16->12), not an absolute CV threshold (the uniform k0=2 baseline already sits at CV 0.16-0.31).
+17. LOCAL UNCAPPED RUNS (Kirk's WSL box, via a mounted Downloads folder): stage a SINGLE
+    dependency-free .py (bundle physics+estimators verbatim via ast.get_source_segment; the
+    estimators need NO networkx if you pass adjacency dicts directly) + a .bat that does
+    `start "title" wsl.exe -e bash -lc "cd /mnt/c/... && mkdir -p out && python3 runner.py ... > out/run.log 2>&1"`;
+    double-click the .bat in File Explorer (full tier; terminals are click-only so you cannot type).
+    Watch out/results.jsonl + out/progress.txt through the mount. VERIFY the bundled runner
+    reproduces the frozen benchmark + a known pickle in-sandbox BEFORE launching (it did: torus
+    m=13 d_s 3.0706 == 3.071). Gotchas: (a) do NOT run two big scans at once on a loaded gaming
+    box -- they starve each other (~1 sweep/s each); one uncontended scan is far better. (b) a
+    `bash -lc "pkill -f runner.py; ..."` SELF-MATCHES (its own cmdline contains the pattern) and
+    kills its own launcher -- kill instead with `bash kill.sh` where kill.sh greps a pattern NOT
+    in the bash cmdline (e.g. a unique arg like 'equil 2000'). (c) mkdir the outdir BEFORE the
+    `> out/run.log` redirect or the shell redirect fails and python never starts.
