@@ -100,8 +100,8 @@ unpickle). Every measurement is reproducible from the seeds.
 
 ## 3. Runner + tools (key flags)
 
-    PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \\
-      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \\
+    PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \
+      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \
       --budget-s 34 --scratch <dir>/scratch --log <dir>/rec.jsonl
 - `--grind` : fast thermalization -- runs sweeps, keeps census + checkpoint, SKIPS the d_s/d_H
   estimators (~5-6 s/chunk saved). Use for the V=24000 f22 climb; switch to normal chunks near
