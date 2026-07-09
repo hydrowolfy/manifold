@@ -109,3 +109,12 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     unpickle as whatever __main__ currently is (frontier2 instance gains the new methods; state migrates).
 22. ENGINEERING (re-learned, cost one call): do NOT loop two budgeted --chunk runs in one bash call --
     the 45 s wall cap kills the second and times out the whole call (lesson 8). One chunk per call.
+
+## Volume-profile side-quest (physical-extended vs collapse)
+23. THE TWO NEAR-MISSES DIFFER IN KIND (measured N3(t) profiles; PREREG_CDT_PROFILE.md -> REPORT_CDT_PROFILE.md).
+    At the alpha/k22-condensed point where d_s hits benchmark (k0=6, V6000 T12) the spatial-volume profile is a
+    COLLAPSE: blob-with-stalk, CV 0.68->0.99 and RISING, max/mean 3.4, 3 depleted floor slices (K1+K2+K3) -- even
+    though census bad=0 and d_s(8-24)=3.14 is dead on benchmark. At the hub-sigma point where d_H passes
+    (sigma=0.10, ratio 0.935) the profile is EXTENDED: CV 0.24, no stalk, volume across 11/12 slices, stable.
+    So a d_s "improvement" via low f22 is CONDENSATION, not a real extended 3-manifold; only the hub/d_H near-miss
+    is a genuine extended geometry (it merely lands the wrong dimension). Read alpha/d_s gains as collapse.
