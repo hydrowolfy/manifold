@@ -1,121 +1,112 @@
 # HANDOFF: causal CDT scaling program (cold-start brief)
 
-Updated 2026-07-09, SEVENTH campaign + volume-profile side-quest + STAGE 1 (topology; REPORT_CDT_TOPOLOGY.md)
-+ STAGE 2 (exotic / non-local action; REPORT_CDT_ACTION.md)
-+ STAGE 3 (dimensional / 3+1D; REPORT_CDT_4D.md + PART C production machinery REPORT_CDT_4D_PRODUCTION.md).
-Work lives in git: branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
-Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order.
+Updated 2026-07-09, end of the SEVENTH campaign (hub / measure term -- the frontier closer). Work lives in git:
+branch `causal-cdt-scaling` of https://github.com/hydrowolfy/manifold (cut from `explore/3d-manifold`).
+Read `LESSONS_CDT.md` (traps) and the REPORT_CDT_*.md in order; `REPORT_CDT_HUB.md` is the
+current closer, `PREREG_CDT_HUB.md` the preregistration it answers.
 
 ## 0. Bottom line so far
 
-Genuine 2+1D causal CDT is built and validated. The frontier question -- can d_H AND d_s hit the
-exact benchmark JOINTLY -- is a proven NO in 2+1D (a volume-stable, topology-independent,
-six-lever-family structural wall rooted in the per-slice Euler lock dN22 = -4 dN0), and the escape
-is DIMENSIONAL. STAGE 3 (REPORT_CDT_4D.md) broke the wall STRUCTURALLY: 3+1D has NO analogue of
-dN22=-4dN0 (a closed 3-manifold slice has f-vector DOF 2, not 1: its tetrahedron count is free of
-its vertex count), so spatial-vertex density N0 and the timelike fraction N32/N4 are TWO INDEPENDENT
-DOF -- matching the standard 4D CDT action's two couplings (kappa0<->N0, Delta<->the (4,1)/(3,2)
-split) and its extended de Sitter phase. The flat foliated Kuhn T^4 is a validated census-clean
-joint-4 calibrant (d_s~4.1-4.5). STAGE 3 PART C (this session, REPORT_CDT_4D_PRODUCTION.md) BUILT +
-VALIDATED the full production apparatus; the dynamical de Sitter verdict is PENDING an uncapped run
-(see section 9). Earlier stages' detail is in REPORT_CDT_FRONTIER/K0/HUB/TOPOLOGY/ACTION.md.
+Genuine 2+1D causal CDT is built and validated (typed (3,1)/(2,2)/(1,3) tets on S^2 x S^1,
+five foliation-preserving Pachner moves, census bad=0 everywhere). It breaks Euclidean crumpling
+(d_H(2-6) converges; Euclid d_s never flows). The frontier question -- can d_H AND d_s hit the
+exact-T^3 benchmark JOINTLY at large V -- is answered:
+
+**No, not cleanly. The d_H-d_s tradeoff is a genuine, VOLUME-STABLE structural obstruction,
+controlled by slice size s = N3/T. Both dims are V-independent monotonic functions of s;
+d_s(8-24)=benchmark at s~=385, d_H(2-6)=benchmark at s~=1940 (~5x apart) -- no aspect at any V
+lands both. The alpha (k22) lever moves both toward benchmark but only by driving spatial-volume
+condensation (transient crossing, not a stable 3-manifold). On the long window (16-48) the
+fattest V=24000 aspect is within ~0.17 of benchmark on both -- a weak long-window near-agreement
+suggesting the short-window excess is partly a lattice artifact.** Full detail + gate table +
+caveats in REPORT_CDT_FRONTIER.md.
+
+Campaign 6 (REPORT_CDT_K0.md) tested the k0 axis: the WALL HOLDS ACROSS CDT PHASES. f22 (the
+(2,2)-tet fraction) is the order parameter -- both k0(up) and k22(up) push f22 down, which fixes
+d_s but decouples the slices and CONDENSES the volume (CV rises, d_H drops). No (k0,k22) gives
+d_s=benchmark + uniform profile + d_H=benchmark together. Higher k0 makes condensation WORSE.
+Campaign 7 (REPORT_CDT_HUB.md) closed both remaining escapes. (A) The requested "add spatial
+vertices WITHOUT removing (2,2) tets" move is COMBINATORIALLY IMPOSSIBLE: spatial slices are
+2-spheres so N22 = N3 - 4 N0 + 8 T exactly (Euler); dN22 = -4 dN0 at fixed (N3,T); no move set
+escapes an Euler identity (verified integer-exact, slope -4.0000). (B) The one lever the identity
+leaves open -- a non-Regge hub measure term sigma*sum_v max(0,deg-D0)^2 -- LIFTS d_H to benchmark
+at a UNIFORM profile (the thing k0/k22 never did) but overshoots d_s downward; the G2/G3 pass
+regions are DISJOINT (d_H needs sigma>=0.05, d_s needs sigma<=0.02), so no joint pass. The wall
+holds even outside the standard move set. Open levers now (all orthogonal to the simplex sector):
+a term hitting d_s ALONE (short-loop / spectral-gap), V >> 24000 on the thin-aspect route, or a
+different ensemble (higher-genus slices, N22=N3-4N0+8T-8*sum genus -- a separate program).
 
 ## 1. Environment (fresh session, Linux sandbox)
 
     git clone https://github.com/hydrowolfy/manifold.git /tmp/m   # or into sandbox home
     cd /tmp/m && git checkout causal-cdt-scaling
-    pip install networkx --break-system-packages     # ONLY dep for the 2+1D runner (cdt4_* are stdlib-only)
+    pip install networkx --break-system-packages     # ONLY dependency (no numpy)
     export MANIFOLD_REPO=$(pwd)
-    PYTHONPATH=.:tooling python3 cdt_causal_run.py --selftest     # 2+1D core (must print ALL ... PASSED)
-    PYTHONPATH=.:tooling python3 cdt4_prod_selftest.py            # 3+1D full move set (ALL PASSED)
-    PYTHONPATH=.:tooling python3 cdt4_scan.py --db-check          # 3+1D Metropolis DB (worst 0.00e+00)
+    PYTHONPATH=.:tooling python3 cdt_causal_run.py --selftest     # must print ALL ... PASSED
 
 NOTE: git does NOT work on a mounted outputs dir (unlink EPERM) -- clone into sandbox-local home
 and commit via the GitHub connector. Keep *.pkl / tarball / floats jsonl out of git.
 
 ## 2. Checkpoints & data are NOT in the repo (deliberate)
 
-Chain-state pickles (scratch/*.pkl) and measurement jsonls are gitignored (binary/large). They
-regenerate deterministically per seed. Every measurement is reproducible from the seeds.
+Chain-state pickles (scratch/*.pkl) and the measurement jsonls are gitignored (binary/large,
+connector can't attach). They regenerate deterministically per seed. If a prior session's
+/tmp/work exists, its scratch/*.pkl are usually world-readable -- COPY them into your scratch to
+resume campaign-4/5 states without regrowing (the runner is byte-identical on the branch, so they
+unpickle). Every measurement is reproducible from the seeds.
 
-## 3. 2+1D runner + tools (key flags)
+## 3. Runner + tools (key flags)
 
-    PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \\
-      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \\
+    PYTHONPATH=.:tooling python3 cdt_causal_run.py --chunk \
+      --k0 2.0 --T 19 --V 24000 --seed 0 --k22 0.0 --tune 600 --sweeps 100000 \
       --budget-s 34 --scratch <dir>/scratch --log <dir>/rec.jsonl
-- `--grind` fast thermalization (skips estimators); `--k22 X` the CDT asymmetry; `--measure-long`
-  measures current pickle; `remeasure.py` seed-averaged re-measure; `torus_benchmark.py` exact Kuhn T^3.
-- Budgets: V=24000 pair <= 34 s, V<=12000 <= 38 s. ONE pair per bash call (45 s wall cap).
+- `--grind` : fast thermalization -- runs sweeps, keeps census + checkpoint, SKIPS the d_s/d_H
+  estimators (~5-6 s/chunk saved). Use for the V=24000 f22 climb; switch to normal chunks near
+  equilibrium (f22 ~0.38). NEW this campaign.
+- `--k22 X` : the CDT asymmetry (coeff on N22). k22>0 penalizes (2,2) tets -> lowers f22, raises
+  N0/d_H, lowers d_s, and (crucially) drives profile condensation. Separate scratch dir per k22
+  (the checkpoint tag is (k0,T,V,seed) and omits k22 -- collisions otherwise).
+- `--measure-long` : measure current pickle (no advance), windows d_s 4-12/8-24/16-48/30-90,
+  d_H 2-6/3-8/4-10, tmax=100.
+- `remeasure.py` (NEW): re-measure any pickle OR exact torus with K estimator seeds -> error bars,
+  profile CV, mean degree. `--pkl <p> --seeds 8 --tmax 50 --dswin 8-24,16-48 --seedbase 100`
+  (use a different --seedbase for independent verification). `--torus m` for the benchmark.
+- `torus_benchmark.py` : exact Kuhn T^3; size-match by N0 (V6000<->m10, V12000<->m13, V24000<->m16).
+- Budgets: V=24000 pair <= 34 s (2x5.6MB saves + measure overran 45s at 40s); V<=12000 <= 38 s.
+  ONE pair per bash call (looping budgeted chunks blows the 45 s cap).
 
-## 3b. 3+1D runner (STAGE 3 PART C -- cdt4_prod.py + cdt4_scan.py, stdlib-only)
+## 4. Throughput (measured)
 
-    python3 cdt4_scan.py --db-check                     # Metropolis detailed balance (0.00e+00)
-    python3 cdt4_scan.py --scan --T 5 --N4t 15000 --eps 0.01 \\
-        --grid-k0 1.5,2.2,3.0,4.0 --grid-D 0.0,0.4,0.6 --meas-seeds 8 --scratch scratch
-  --grow/--thermalize/--scan/--measure; checkpoint+resume per (k0,D); results.jsonl + progress.txt.
-  Needs N0 >~ 1300 (T>=6) for un-saturated d_s/d_H (LESSONS 43); thermalize N0 to a plateau (LESSONS 44).
-
-## 4. Throughput (2+1D, measured)
-
-~8 sweeps/s @ V6000, ~2.3-3/s @ V12000, ~1.1/s @ V24000 (pair). 3+1D: ~4-5k mstep/s in-sandbox at
-N4~6k (native WSL faster); N0 equilibration is the slow mode (LESSONS 44), budget long runs.
+~8 sweeps/s @ V6000, ~2.3-3/s @ V12000, ~1.1/s @ V24000 (pair). V=24000 fresh thermalization is
+~18-20 chunk-pairs (grow leaves f22~0.03, must climb to ~0.38). alpha warm-start re-equilibration
+~1000-2000 sweeps. Benchmark m<=16 remeasure with 8 seeds is a few seconds.
 
 ## 5. What remains (ranked)
 
-1. THE 3+1D DE SITTER PRODUCTION RUN (primary; section 9). Machinery built + validated; run it on
-   the uncapped WSL box to gate quality (N0>1300, thermalize each (k0,D) to a plateau) and score vs
-   the frozen gate G1-G5 (PREREG_CDT_4D_PRODUCTION.md). Expected: phase C ~ (2.2,0.6) passes.
-2. 2+1D in-ensemble leftover: genuinely thin large-T V>>24000 to put a MEASURED d_H at the
-   d_s=benchmark slice size (campaign-5 extrapolation says the miss shrinks slowly; likely futile).
-3. [DONE] volume-profile side-quest (section 7); STAGE 1 topology (section 8); STAGE 2 non-local;
-   STAGE 3 Part A/B structural (REPORT_CDT_4D.md).
+1. DONE (campaign 7): the spacelike-refinement move is PROVEN IMPOSSIBLE (Euler identity), and the
+   hub measure term reparameterizes but does not beat the tradeoff. Next: a d_s-only term (short-loop
+   / spectral-gap), or V>>24000 thin-aspect for d_H, or a higher-genus-slice ensemble (separate).
+2. Genuinely thin large-T V=24000 (T~60, s~385) to put a MEASURED d_H at the d_s=benchmark slice
+   size at the top volume -- nails the volume-stability of the 0.64 d_H ratio directly.
+3. Measure the de Sitter volume profile of the alpha-condensed states -- physical extended phase
+   or a collapse? (Decides how to read the alpha "improvement".)
+4. Euclid control at matched large size (negative-control arm above n0<=500).
 
-## 6. File inventory (branch causal-cdt-scaling) -- 3+1D additions
+## 6. File inventory (branch causal-cdt-scaling)
 
-- cdt_4d_lock_check.py : STAGE 3 PART A gate (no 3+1D analogue of dN22=-4dN0; 4D Dehn-Sommerville).
-- cdt4_benchmark.py : exact flat T^4 benchmark (validity + estimator calibration d_s~4.1-4.5).
-- cdt4_causal.py : foliated Kuhn T^4 causal calibrant + two-DOF demonstration.
-- cdt4_run.py : minimal 3+1D causal core + (2,4)/(4,2) pair (FOUNDATION; 200 round-trips + 4000 chain).
-- cdt4_prod.py : STAGE 3 PART C self-contained core = cdt4_run Causal4 + FULL ergodic move set
-  ((3,3),(4,6)/(6,4),(2,8)/(8,2)) + Kuhn seed + bundled estimators (indexed-sets + incidence maps).
-- cdt4_prod_selftest.py : every move DB round-trip + census + counters==recount + mixed chain (ALL PASS).
-- cdt4_ergodicity.py : N4 & N0 bidirectional, f_tl tunable 0.26-0.55, census-clean (PASS).
-- cdt4_scan.py : Metropolis + (k0,Delta) scan driver + --db-check (0.00e+00) + checkpoint/resume.
-- PREREG_CDT_4D.md / REPORT_CDT_4D.md : stage-3 structural prereg + verdict (path open; calibrant valid).
-- PREREG_CDT_4D_PRODUCTION.md / REPORT_CDT_4D_PRODUCTION.md : PART C prereg (gate G1-G5) + verdict
-  (machinery complete + validated; dynamical de Sitter pending the uncapped run).
-- (2+1D files: cdt_causal_run.py, cdt_frontier2/3_run.py, cdt_torus_run.py, remeasure.py, tooling/ ...)
-
-## 7. Volume-profile side-quest resolved (2026-07-09)
-
-The two 2+1D near-misses differ in KIND: the alpha/k22 state where d_s hits benchmark (k0=6 V6000 T12,
-CV 0.68->0.99 rising, blob-with-stalk) is a COLLAPSE; the hub sigma=0.10 state where d_H passes (CV 0.24,
-extended across 11/12 slices) is a GENUINE EXTENDED phase. Read alpha/d_s gains as condensation.
-
-## 8. STAGE 1 (topology frontier) resolved (2026-07-09)
-
-Making each spatial slice a 2-TORUS: the identity generalizes to N22=N3-4N0+4chiT but the DIFFERENTIAL
-dN22=-4dN0 is topology-independent (dchi=0), so the wall reappears at every genus and the ensemble hubs
-anyway. Topology is CLOSED; the escape is DIMENSIONAL -> STAGE 3.
-
-## 9. STAGE 3 PART C (production machinery) resolved 2026-07-09 -- MACHINERY COMPLETE, de Sitter run PENDING
-
-The production de Sitter apparatus (PREREG_CDT_4D E1) is BUILT and VALIDATED; the dynamical
-verdict awaits an uncapped run (staged, blocked this session by desktop contention). Built:
-- The FULL ergodic AJL move set on cdt4_run.py: (2,4)/(4,2) + (3,3) + (4,6)/(6,4) + the vertex-
-  changing (2,8)/(8,2) [the N0 DOF; 4D lift of 2+1D (2,6)]. Each DB-verified (byte-identical round-
-  trip, reverse dS=-forward) + census bad=0 (cdt4_prod_selftest.py). Ergodicity shown (N4 & N0
-  bidirectional 6144<->14588; 256<->1432; f_tl 0.26-0.55). Metropolis DB (with the vertex Jacobian)
-  verified to 0.00e+00 over 828 pairs (cdt4_scan.py --db-check). Bundled estimators reproduce the
-  frozen flat-T^4 benchmark bit-for-bit (d_H=2.6556, d_s=4.2001 vs networkx referee; 8-seed 4.01+-0.69).
-- NO de Sitter claim: gate-quality needs N0>~1300 (else estimators saturate, LESSONS 43) + long N0
-  thermalization at fixed N4 (LESSONS 44). In-session sandbox runs are finite-size-saturated +
-  under-thermalized -> PREREG_CDT_4D_PRODUCTION Sec 5 rule 2 (partial/honest landing).
-
-STAGED for the uncapped run: C:\Users\Kirk\Downloads\cdt4run\ (WSL /mnt/c/Users/Kirk/Downloads/
-cdt4run) = cdt4_prod.py + cdt4_scan.py + cdt4_prod_selftest.py + run_cdt4_scan.bat (double-click ->
-minimized WSL job, resumable/extendable) + kill_cdt4.bat + README_RESUME.txt. Bundle re-verified
-STANDALONE there (DB check PASS, selftest PASS). NEXT SESSION: get desktop access (clear any other
-Claude session), double-click run_cdt4_scan.bat, watch scratch/results.jsonl + progress.txt; run at
-N4t large enough that eq. N0>1300 (T>=6) and thermalize each point to an N0/f_tl/CV plateau; score
-vs the gate. Expected (Part A + AJL): phase C ~ (2.2,0.6) passes = WALL BROKEN DYNAMICALLY.
+- cdt_causal_run.py : the 2+1D causal CDT implementation + selftest + chunked runner (+ `--grind`).
+- remeasure.py : seed-averaged re-measurement of pickles/tori with error bars + profile CV + degree.
+- euclid_control.py : Euclidean negative control. torus_benchmark.py : exact Kuhn T^3.
+- PREREG_CDT_JOINT.md / PREREG_CDT_K0.md : campaign-5 / campaign-6 preregistrations.
+- cdt_k0_local.py : SELF-CONTAINED zero-dep (stdlib-only) runner for UNCAPPED local (WSL) runs --
+  physics+estimators bundled verbatim, no networkx; --scan does a k0 x k22 grid, checkpointed/
+  resumable, results.jsonl per snapshot. Verified in-sandbox to reproduce the frozen benchmark.
+- REPORT_CDT_HUB.md : campaign-7 closer (identity impossibility of the new move + hub-term scan).
+  PREREG_CDT_HUB.md : its preregistration (locked-identity result + G1-G5 gate, committed before scan).
+  hub_scan_driver.py : resumable staged sigma-scan driver (imports verified physics; self-limits under
+  the sandbox wall, checkpoints scan_state.json + results.jsonl, re-invoke until 'SCAN COMPLETE').
+  verify_identity.py / verify_hub_db.py : integer-exact identity check + brute-force hub-DB delta check.
+- REPORT_CDT_FRONTIER.md : campaign-5 verdict (slice-size obstruction; alpha condensation).
+- REPORT_CDT_K0.md : campaign-6 verdict (wall holds across k0 phases; f22 order parameter).
+- REPORT_CDT_CAUSAL / _SCALING / _STALL_RESOLVED / _CONVERGENCE .md : campaigns 1-4 in order.
+- LESSONS_CDT.md : accumulated traps (READ FIRST). tooling/ : referee estimators (verbatim).

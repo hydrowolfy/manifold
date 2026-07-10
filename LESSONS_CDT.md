@@ -83,183 +83,31 @@ Consolidated across five campaigns. These are the traps that cost time; roll the
     in the bash cmdline (e.g. a unique arg like 'equil 2000'). (c) mkdir the outdir BEFORE the
     `> out/run.log` redirect or the shell redirect fails and python never starts.
 
-## Campaign 7 additions (the locked identity + hub measure term)
-18. THE LOCKED IDENTITY (the big one). Per-slice Euler on the S^2 slices (F = 2V - 4) forces, for the
-    WHOLE foliated complex: N31 = N13 = 2 N0 - 4 T and **N22 = N3 - 4 N0 + 8 T**, i.e.
-    f22 = 1 - 4 (N0 - 2 T) / N3. Verified EXACT to the integer on seed/grown/thermalized states (k0=2,5)
-    and it reproduces the campaign-6 k0-map f22 from (N0,N3,T). Consequence: at fixed volume and T,
-    dN22 = -4 dN0. Spatial-vertex density and the (2,2) fraction are ONE locked DOF. So "add spatial
-    vertices WITHOUT removing (2,2) tets" is COMBINATORIALLY IMPOSSIBLE -- no move (standard or exotic)
-    escapes it, because every foliation-preserving local move preserves the identity. Check any proposed
-    escape against this identity FIRST; it kills the whole "new move" branch by proof.
-19. THE ONLY FREEDOM LEFT AT FIXED COUNTS IS THE DEGREE DISTRIBUTION. The identity pins simplex counts
-    and the mean degree (sum_v deg = 2 N1 = 2(N0+N3)); the variance is free. Causal states have hubs
-    (deg max ~84, sd ~10) absent in the regular torus (14, sd 0). The hub-suppression measure term
-    S += sigma * sum_v max(0, deg_v - D0)^2 is the sole non-excluded lever. It is DB-safe (state
-    function; proposals unchanged; per-move delta == brute-force; reverse delta = -forward) and manifold-
-    preserving (census bad=0). But it REPARAMETERIZES THE SAME TRADEOFF: d_s(8-24) falls and d_H(2-6)
-    rises monotonically with sigma, crossing the benchmark ~10x apart in sigma (d_s at ~0.007, d_H at
-    ~0.08). No sigma passes G2+G3. Powerful lever, same wall. (Implementation: cdt_frontier2_run.py.)
-20. HUBS SET BOTH DIMS OPPOSITELY: they saturate ball growth (d_H low) AND add walk shortcuts (d_s high);
-    removing them de-saturates d_H up and confines the walk so d_s falls THROUGH the benchmark. This is
-    the campaign-5/6 d_H-d_s anticorrelation reproduced by a third independent knob -- it is a property of
-    the ensemble's diffusion geometry, not of any one coupling.
-21. RESUME-COMPAT: cdt_frontier2_run.py rebuilds the deg cache from st.ecnt on load, so pre-campaign-7
-    pickles resume cleanly. Pickles from a `python3 script.py` run store class as __main__.Causal and
-    unpickle as whatever __main__ currently is (frontier2 instance gains the new methods; state migrates).
-22. ENGINEERING (re-learned, cost one call): do NOT loop two budgeted --chunk runs in one bash call --
-    the 45 s wall cap kills the second and times out the whole call (lesson 8). One chunk per call.
-
-## Volume-profile side-quest (physical-extended vs collapse)
-23. THE TWO NEAR-MISSES DIFFER IN KIND (measured N3(t) profiles; PREREG_CDT_PROFILE.md -> REPORT_CDT_PROFILE.md).
-    At the alpha/k22-condensed point where d_s hits benchmark (k0=6, V6000 T12) the spatial-volume profile is a
-    COLLAPSE: blob-with-stalk, CV 0.68->0.99 and RISING, max/mean 3.4, 3 depleted floor slices (K1+K2+K3) -- even
-    though census bad=0 and d_s(8-24)=3.14 is dead on benchmark. At the hub-sigma point where d_H passes
-    (sigma=0.10, ratio 0.935) the profile is EXTENDED: CV 0.24, no stalk, volume across 11/12 slices, stable.
-    So a d_s "improvement" via low f22 is CONDENSATION, not a real extended 3-manifold; only the hub/d_H near-miss
-    is a genuine extended geometry (it merely lands the wrong dimension). Read alpha/d_s gains as collapse.
-
-## STAGE 1 additions (surgical -- torus spatial slices, T^2 x S^1; cdt_torus_run.py)
-24. TOPOLOGY DOES NOT UNLOCK THE IDENTITY -- ONLY ITS CONSTANT. Generalized Euler for a genus-g slice:
-    chi=2-2g, F=2V-2chi, so N31=N13=2N0-2chiT and **N22=N3-4N0+4chiT** (sphere +8T, torus +0). BUT chi is a
-    topological invariant, dchi=0 under every foliation-preserving move, so **dN22=-4dN0 at fixed (N3,T) holds
-    for EVERY genus**: the differential lock -- the ROOT of the wall -- is topology-INDEPENDENT. Changing slice
-    topology moves only the constant term. So "add spatial vertices without removing (2,2) tets" stays impossible
-    on any closed-surface slice, and N0/f22 are never two independent knobs. Corollary: move weights (2-3:+1,
-    3-2:-1, 2-6/6-2/4-4:0) are UNCHANGED, so cdt_torus_run.py reuses the S^2 Metropolis core VERBATIM -- only the
-    seed (flat torus grid) and the per-slice census (chi=0 + orientability) differ. Verified exact in --selftest.
-25. THE TORUS HUBS TOO (the empirical half). Even though the torus ADMITS a uniform degree-6 flat slice (6chi=0;
-    the sphere FORBIDS it, 6chi=12) and that flat state IS the benchmark, the causal ensemble at the matched
-    baseline (V6000 T12 k0=2 k22=0) equilibrates to hubs deg 15.4/sd 11.0/max 79 -- essentially identical to the
-    S^2 baseline 14.6/10.2/84 -- with d_H(2-6)=1.68 (ratio 0.68) and d_s(8-24)=3.48: the sphere's exact FAILING
-    corner. Hub formation is ENTROPIC (many hubbed triangulations, one flat one), not curvature-forced, hence
-    topology-independent. The k22 lever reproduces the anticorrelation + condensation (k22=1: d_s 3.48->3.27 onto
-    benchmark, d_H 1.68->1.93, CV 0.10->0.22). No joint pass. VERDICT: the 2+1D wall is a property of DIMENSION +
-    diffusion geometry, not of the spatial slice topology.
-26. FLAT CALIBRANT recipe (an in-topology exact benchmark): T identical flat m x n torus grids (uniform deg 6)
-    stacked by the SAME ordered-prism split (lower-vertex->higher-vertex diagonal) the octahedral seed uses --
-    that split is globally consistent for ANY ordered surface triangulation, sphere or torus. Gives an exact flat
-    T^2xS^1 (== flat T^3): f22=1/3 EXACTLY, deg 14 sd 0, census bad=0, and it reproduces Kuhn T^3 d_s/d_H at
-    matched N0 (a second, independent benchmark: d_s 3.10+-0.21, d_H 2.43 vs Kuhn 3.13+-0.18 / 2.47). Always check
-    slice ORIENTABILITY in selftest (chi=0 alone is torus OR Klein bottle; Pachner moves can't flip it, but verify).
-27. STAGE ORDERING, revised by the stage-1 result. TOPOLOGY IS CLOSED: higher genus won't help (lesson 24), so
-    stop varying spatial topology. Remaining escapes are DIMENSIONAL (3+1D CDT, the de Sitter phase reaches 4 in
-    both dims) or NON-LOCAL (a long-range action on the diffusion geometry, not a local per-vertex term). The
-    stage-1 result RE-RANKS 3+1D above the non-local probe: the wall survives every in-2+1D lever incl. topology,
-    which is the evidence to change the DIMENSION rather than keep reshuffling 2+1D.
-
-## STAGE 2 additions (exotic -- non-local action/measure terms; cdt_frontier3_run.py)
-28. NON-LOCAL != escapes the wall. Two non-local terms were tried and BOTH fail: (NL-P) profile-
-    uniformity lam_p*sum_t(n(t)-nbar)^2 -- non-separable across the foliation -- and (NL-D) a symmetric
-    global degree counter-term lam_d*sum_v(deg_v-14)^2 driving the FULL degree distribution to the flat
-    delta (stronger than c7's one-sided cap). The d_H-d_s wall is a 6th independent lever-family it now
-    survives (after aspect, k0xk22, hub cap, topology). Register the same prior for any further in-2+1D term.
-29. THE PROFILE IS ORTHOGONAL TO THE WALL. NL-P drives profile CV 0.25 -> 0.01 (razor-uniform tube) and
-    does NOTHING to d_s/d_H on the extended baseline (3.30->3.42, ratio 0.707->0.712). The wall lives in
-    the DEGREE / diffusion geometry, not the spatial-volume profile. Corollary win: NL-P DE-CONDENSES the
-    k22 lever (k22=1.0 alone CV->~1 collapse; k22=1.0 + NL-P CV 0.01) -- so you can now hold a uniform
-    profile at low f22. Useful, but it does not open the gate (d_H stays low where the profile is uniform).
-30. MATCHING THE FLAT DEGREE SIGNATURE IS NECESSARY, NOT SUFFICIENT. NL-D forces deg->14 everywhere but
-    d_H SATURATES at ratio ~0.85 (below the 0.90 gate) while d_s collapses (3.30->2.75). It is even worse
-    than c7's one-sided cap for d_H, because forcing UNDER-connected vertices UP to 14 re-adds short-range
-    connectivity that re-saturates ball growth. Uniform-degree-14 causal triangulations are exponentially
-    many and walk-confining; the flat lattice is one microstate. Degree uniformity is not lattice regularity.
-31. THE STRONGEST COMBINED LEVER STILL FAILS -- and it is the cleanest statement of the wall. k22 (lower
-    f22) + NL-P (uniform profile) + a hub cap (remove hubs) = a PERFECTLY UNIFORM (CV 0.01), census-clean,
-    hub-suppressed 3-manifold -- the closest structural match to the flat calibrant any lever set produces.
-    It drives d_H ABOVE benchmark (ratio 1.05-1.07) while d_s COLLAPSES to ~2.0-2.2. Sweeping the hub cap
-    0->0.05: d_H 0.85->1.07, d_s 3.03->2.05; at the sigma where d_H=0.90, d_s~2.8 (below the G3 floor).
-    The needle is unthreadable. Reproducing the flat manifold's profile AND degree is not enough: the
-    residual walk-confining IRREGULARITY of the causal 1-skeleton (beyond profile and degree) is the wall.
-32. THE ESCAPE IS DIMENSIONAL -- and stage 3 has a CHEAP first gate. Before any 3+1D Metropolis build,
-    write down the 3+1D Dehn-Sommerville / Euler relations among N_{ij}(4,1/3,2/2,3/1,4), N0, N1 and check
-    whether they leave spatial-vertex density and the timelike-simplex fraction as TWO independent DOF (no
-    2+1D-style single lock dN22=-4dN0). If yes, that is the a-priori reason 3+1D reaches 4 in both dims; if
-    an analogous lock appears, it reshapes the program. Checkable on paper / a tiny seed census first.
-33. ENGINEERING (re-learned, cost one call): still ONE budgeted --chunk per bash call (LESSONS 8/22). Also:
-    the mounted-outputs Edit tool truncated a large file mid-write once -- author repo files via bash
-    heredoc in the sandbox-local clone, not via the mount, and wc -l / tail to verify before running.
-34. WARM-START BY TAG-COPY. cdt_frontier3_run.py's checkpoint tag now includes (sigma,lam_d,lam_p,k22) so
-    term runs never collide (LESSONS 10). To warm-start a term point from an equilibrated baseline, `cp`
-    the baseline pickle onto the target tag's filename, then --chunk with the term: it resumes and re-
-    equilibrates. remeasure.py reads frontier3 pickles unchanged (extra sprof attr is harmless).
-
-## STAGE 3 additions (dimensional -- 3+1D; cdt_4d_lock_check.py / cdt4_benchmark.py / cdt4_causal.py / cdt4_run.py)
-35. THE CHEAP GATE ANSWERED: NO 3+1D ANALOGUE OF THE LOCK. The 2+1D wall's root is that a
-    closed SURFACE slice has f-vector DOF = 1 (2E=3F, V-E+F=chi => F=2V-2chi locks the top-
-    simplex count to V). A closed 3-MANIFOLD slice has f-vector DOF = 2 (F=2S, E=V+S leave V
-    AND S=#tets free): there is NO 3D analogue of F=2V-2chi. So N41 = 2 sum_t S_t is NOT locked
-    to N0 = sum_t V_t -- spatial-vertex density and the timelike fraction are TWO independent
-    DOF. dN22=-4dN0 has no 3+1D analogue. Always check a new dimension's SLICE f-vector DOF
-    count first: DOF jumps 1->2 from d=2 to d=3 slices, which is the whole unlock.
-36. 4D DEHN-SOMMERVILLE (derived + census-verified): closed 4-manifold f-vector obeys
-    N3=5N4/2, N1=3N0+N4/2-3chi, N2=2N0+2N4-2chi (2 free params N0,N4 given chi). Verified on
-    dDelta^5, the 5-cross-polytope boundary, CP^2_9 (chi=3), and random 1->5 stellar S^4's.
-    Handy sanity check for any 4D triangulation (the Kuhn T^4 benchmark satisfies it exactly).
-37. THE KUHN T^4 IS A FREE 2-IN-1: the Coxeter-Freudenthal-Kuhn triangulation of (Z/m)^4 is
-    (a) an exact flat 4-torus BENCHMARK -- census bad=0, chi=0, uniform degree 30, DS-exact --
-    AND (b) sliced along one axis, a VALID FOLIATED CAUSAL state (pentachora typed (4,1)/(3,2)/
-    (2,3)/(1,4) 6:6:6:6 per cube, spatial slices = Kuhn T^3). So the flat joint 4-manifold is a
-    genuine member of the causal ensemble (the calibrant), just as the flat T^3 was in 2+1D.
-    Reuse it for both the gate benchmark and the calibrant. (Same trick as LESSONS 26 in 4D.)
-38. ESTIMATOR WINDOWS/SIZE IN 4D. d_s cleanly reads 4D: flat T^4 d_s(8-24)=4.12 (N0=1296) ->
-    4.49 (N0=4096), vs flat T^3 ~3.13 -- d_s is THE discriminating observable (4D vs 3D). d_H
-    carries the SAME large finite-size downward offset as 3D (reads ~2.66-2.84 below 4, as T^3
-    reads ~2.47 below 3) and drifts UP with size; small tori (m<=5) SATURATE (d_H(2-6) 1.6-2.6,
-    ball hits wraparound). Use N0>=~1300 (m>=6) for the benchmark; score d_s vs the finite-size
-    T^4 value, NEVER 4.0 (LESSONS 1). d_H is deterministic on the torus (vertex-transitive, sd 0).
-39. 4D MOVE VALIDATION. Pachner moves preserve PL-manifold type BY THEOREM, so starting from a
-    valid manifold (Kuhn T^4) and applying only legal Pachner flips + the CDT foliation legality
-    (new pentachora must span exactly 2 ADJACENT slices) guarantees manifoldness -- no 3-sphere
-    recognition needed. The 4D (2,4)/(4,2) pair: legality is "edge {a,b} absent" (fwd) / "the 4
-    pentachora around {a,b} are the 4 triangle-cofaces of a re-addable tetrahedron" (inv). Verify
-    DB the 2+1D way: exact round-trips (complex identical after (2,4) then (4,2)), reverse delta =
-    -forward, census bad=0 throughout (cdt4_run.py --selftest: 200 round-trips + a 4000-move chain,
-    all clean). NOTE: (2,4)/(4,2) alone is NOT ergodic -- a production de Sitter sweep needs the
-    full AJL set (add (3,3) + vertex-changing moves). Build/validate those before claiming dynamics.
-40. HONEST STAGE-3 LANDING. The DECISIVE result is structural (Part A: two DOF, exact) + the
-    validated calibrant (joint-4 exists in the ensemble). Do NOT claim "de Sitter reached" from a
-    non-ergodic / under-validated MC -- that violates the program's discipline. The production
-    sweep (full move set, uncapped (kappa_0,Delta) scan) is preregistered (PREREG_CDT_4D.md E1)
-    and pending; its expected landing (WALL BROKEN) is the known 4D CDT de Sitter phase, for which
-    this stage supplies the program's own from-scratch combinatorial WHY.
-
-## STAGE 3 PART C additions (production machinery: full move set + Metropolis; cdt4_prod.py / cdt4_scan.py)
-41. THE FULL ERGODIC 4D MOVE SET, built on cdt4_run.py: (2,4)/(4,2) [dN0=0,dN4=+-2], (3,3)
-    [self-inverse, dN4=0], (4,6)/(6,4) [spatial (2,3) flip thru both sandwiches, dN4=+-2,dN0=0],
-    (2,8)/(8,2) [spatial-tet vertex insert/remove, dN0=+-1,dN4=+-6]. (2,8) is the 4D LIFT of the
-    2+1D (2,6): insert a vertex at a SPATIAL tetrahedron's centre (split into 4) -> the 2 pentachora
-    above/below become 8. It is the operational N0 DOF Part A proved independent. Validate EXACTLY as
-    2+1D: forward+reverse = byte-identical complex, reverse dS = -forward, census bad=0/untyped=0 per
-    step (cdt4_prod_selftest.py). All four families pass; a 1500-move mixed chain stays census-clean.
-42. METROPOLIS DETAILED BALANCE with a vertex-changing move needs the move-count Jacobian:
-    A = min(1, (K_fwd/K_rev) exp(-dS)), K = live count of the pick-primitive (tet for 24, edge for
-    42, triangle for 33, spatial-tri for 46, spatial-edge for 64, spatial-tet for 28, VERTEX for 82).
-    Uniform move-type selection makes reverse-pair proposal probs cancel. VERIFY by the balance
-    equation directly: (1/K_f) A_f exp(-S) == (1/K_r) A_r exp(-S') -- held to 0.00e+00 over 828
-    (move,state) pairs at random couplings (cdt4_scan.py --db-check). This is the gold-standard DB
-    check; do it before trusting any run. Action: S = -(k0+6D)N0 + k4 N4 + D(2 N41 + N32) + eps(N4-N4t)^2.
-43. FINITE-SIZE ESTIMATOR SATURATION IS SHARP IN 4D (re-confirming LESSONS 38). At N0=256 (m=4) the
-    referee reads d_s(8-24)~2.46, d_H(2-6)~0.59 -- these are SATURATION ARTIFACTS (ball hits T=4
-    wraparound), NOT dimensions. A gate-quality read of the 4D signal needs N0 >~ 1296 (m>=6). Any
-    de Sitter scan MUST run at N4 large enough that equilibrium N0 clears ~1300, or the d_s/d_H
-    numbers are meaningless. Score vs the finite-size T^4 benchmark at the SAME N0, never 4.0.
-44. N0 IS A SLOW COLLECTIVE MODE AT FIXED N4 (the 4D thermalization bottleneck). The ONLY N0-changing
-    move is (2,8)/(8,2), whose dN4=+-6 is opposed by the volume term eps(N4-N4t)^2 -- so growing N0 at
-    fixed N4 needs (2,8)+3x(4,2) composites and equilibrates slowly. From the (uniform) flat seed, ~30
-    sweeps barely move N0 or the profile CV (0.002). This is intrinsic 4D CDT critical slowing, not a
-    bug; budget long thermalization (10^3-10^4+ sweeps) on the uncapped box. Loose eps lets N0 move but
-    conflates volume; tight eps fixes volume but slows N0. Consider annealing eps, or a DB-correct
-    composite fixed-N4 vertex move, to speed it up.
-45. IMPLEMENTATION FOR SPEED: indexed-sets (list+pos dict) give O(1) uniform pick AND exact live count
-    (the DB K-factors); incidence maps v2p (vertex->pents), tri2tet, edge2tet give O(local) move
-    legality instead of O(N4) scans (prop_42/33/82 were O(N4) without them -> selftest timed out).
-    GUARD every counter against a from-scratch recount() after moves (caught nothing once it was right,
-    but it is the cheap insurance that the DB factors are exact).
-46. SANDBOX ENGINEERING (cost 2 calls): a bash heredoc write of a large file was SILENTLY CLOBBERED by
-    workspace contention (a prior timed-out call), leaving the OLD file -- grep the new file for a
-    signature token (e.g. 'IdxSet') to confirm the write landed BEFORE running. And keep the 45s wall
-    cap in mind: full census()/recount() are O(N4); calling them twice per round-trip across 4 move
-    families blows the cap -- check census per step but recount once per family, and run python3 -u for
-    flushed progress. Bundle for WSL = cdt4_prod.py + cdt4_scan.py (stdlib only, no networkx: the two
-    estimators need only random/math/collections); re-verify the bundle STANDALONE from the staged dir.
+## Campaign 7 additions (hub / measure term; the frontier closer)
+18. THE "ADD VERTICES WITHOUT REMOVING (2,2) TETS" MOVE IS IMPOSSIBLE, by Euler not by dynamics.
+    Spatial slices are 2-spheres => F=2V-4 per slice => N31=N13=2N0-4T and N22=N3-4N0+8T exactly
+    (verify_identity.py: integer-exact on seed/grown/thermalized at k0=2,5; slope (dN22-dN3)/dN0
+    =-4.0000). At fixed (N3,T), dN22=-4 dN0. No enlarged/exotic move set escapes an Euler identity.
+    Before proposing ANY new move to decouple N0 from f22, check it against this identity first --
+    it will fail. The simplex sector has exactly one connectivity d.o.f. left at fixed counts: the
+    degree DISTRIBUTION (hubs), not the counts.
+19. THE HUB MEASURE TERM (sigma*sum_v max(0,deg-D0)^2, non-Regge) LIFTS d_H TO BENCHMARK AT A
+    UNIFORM PROFILE -- the one thing k0/k22 never did (they only raised d_H via condensation, which
+    then dropped it). deg sd 10.4->3.6, deg max 80->21 toward the regular torus; d_H(2-6) 1.84->2.43
+    (ratio 0.74->0.98) at CV 0.16-0.28, bad=0. BUT it overshoots d_s: d_s(8-24) falls 3.24->2.28
+    THROUGH benchmark (16-48 falls too, so real not short-window). Pass regions DISJOINT: G2 needs
+    sigma>=0.05, G3 needs sigma<=0.02; crossover (0.03-0.04) misses BOTH. Hub density is a NEW order
+    parameter for the SAME tradeoff, reparameterized off f22 -- not a second independent knob.
+    D0 only rescales the effective sigma onto the same (d_s,d_H) locus (D0=18 sig0.10 ~ D0=14 sig0.05).
+20. THE TRADEOFF NEEDS TWO KNOBS, ONE PER DIMENSION. Every lever tried (slice size, k0, k22, hub sigma)
+    moves d_s and d_H TOGETHER along a one-parameter curve that crosses the two benchmarks at
+    different places. hubs over-connect (d_s up) AND saturate ball growth (d_H down) simultaneously,
+    so suppressing them can't separate the two. The identity (18) guarantees the simplex sector can't
+    supply a second independent knob at fixed volume/topology. Next lever must hit d_s alone (e.g. a
+    short-loop / spectral-gap term), or change the ensemble (higher-genus slices add (2,2)-room:
+    N22=N3-4N0+8T-8*sum genus), or push V>>24000 on the thin-aspect route (orthogonal to sigma).
+21. HUB-TERM DETAILED BALANCE IS FREE IF THE DELTA IS EXACT: the penalty is a state function, so
+    dS_reverse = -dS_forward automatically. The only risk is a wrong incremental delta -- brute-force
+    it (verify_hub_db.py: _degpen_delta == pen_after-pen_before to 0.0 over every accepted move, deg
+    cache == from-scratch degree every step) BEFORE trusting the chain. Selftest asserts deg-cache
+    non-drift (dict(st.deg)==rebuild); that is necessary but NOT sufficient -- also check the delta.
