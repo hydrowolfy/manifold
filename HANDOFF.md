@@ -112,7 +112,7 @@ verdict awaits an uncapped run (staged, blocked this session by desktop contenti
   thermalization at fixed N4 (LESSONS 44). In-session sandbox runs are finite-size-saturated +
   under-thermalized -> PREREG_CDT_4D_PRODUCTION Sec 5 rule 2 (partial/honest landing).
 
-STAGED for the uncapped run: C:\\Users\\Kirk\\Downloads\\cdt4run\\ (WSL /mnt/c/Users/Kirk/Downloads/
+STAGED for the uncapped run: C:\Users\Kirk\Downloads\cdt4run\ (WSL /mnt/c/Users/Kirk/Downloads/
 cdt4run) = cdt4_prod.py + cdt4_scan.py + cdt4_prod_selftest.py + run_cdt4_scan.bat (double-click ->
 minimized WSL job, resumable/extendable) + kill_cdt4.bat + README_RESUME.txt. Bundle re-verified
 STANDALONE there (DB check PASS, selftest PASS). NEXT SESSION: get desktop access (clear any other
