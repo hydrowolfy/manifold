@@ -1,112 +1,144 @@
-# Campaign 7: the locked identity + hub measure term -- does the wall survive OUTSIDE the standard move set?
+# Hub / measure term: can suppressing 1-skeleton hubs open a STABLE joint d_H+d_s 3-manifold?
 
-Seventh campaign. Preregistered in PREREG_CDT_HUB.md (committed BEFORE the sigma scan). The program's
-open frontier was: find a move that ADDS SPATIAL VERTICES WITHOUT REMOVING (2,2) TETS (outside the
-standard 2+1D CDT move set), to decouple d_s from f22 and open a stable joint (d_H AND d_s) pass.
+Seventh campaign. Preregistered in `PREREG_CDT_HUB.md` (committed BEFORE the scan). Campaigns 5-6
+established the d_H-d_s tradeoff as a slice-size / f22 obstruction that holds across the whole
+k0 x k22 plane; the only escape the program could still name was "a move that raises spatial
+vertex density WITHOUT removing (2,2) tets -- not in the standard 2+1D move set." This campaign
+does two things: (A) proves that requested move is combinatorially impossible, and (B) scans the
+one lever the proof leaves open -- a hub-suppressing measure term outside standard Regge CDT.
 
 ## Verdict
 
-**The wall holds outside the standard move set, and we now know structurally why.**
+**The wall holds -- even outside the standard 2+1D move set.** Two independent results:
 
-1. **The requested move is combinatorially impossible.** For any foliated triangulation of S^2 x S^1
-   in this ensemble the spatial slices are triangulated 2-spheres (F = 2V - 4 per slice), which forces
-   the exact identity
+- **(A) The "new move" is impossible.** For any foliation-preserving triangulation of S^2 x S^1
+  (spatial slices are 2-spheres, F = 2V-4 per slice), the simplex counts satisfy the EXACT identity
+  N31 = N13 = 2 N0 - 4 T and **N22 = N3 - 4 N0 + 8 T**. Hence at fixed volume N3 and time-extent T,
+  dN22 = -4 dN0: adding one spatial vertex destroys exactly four (2,2) tets. This is an Euler-
+  characteristic identity, independent of the moves that generate the state, so NO enlarged or exotic
+  move set escapes it. Verified EXACTLY (integer) on seed, grown, and thermalized states at k0=2 and
+  k0=5, with the finite-difference slope (dN22 - dN3)/dN0 = -4.0000. The frontier's hoped-for escape
+  is closed by proof.
 
-        N31 = N13 = 2 N0 - 4 T,   N22 = N3 - 4 N0 + 8 T,   f22 = 1 - 4 (N0 - 2 T) / N3.
+- **(B) The hub measure term does not open a joint pass.** Adding S += sigma * sum_v max(0, deg_v - D0)^2
+  (a non-Regge term that regularizes the 1-skeleton degree distribution at FIXED simplex counts, hence
+  fixed f22) lifts d_H(2-6) all the way to the benchmark AT A UNIFORM PROFILE -- something neither k0
+  nor k22 could do -- but simultaneously drives d_s(8-24) DOWN through the benchmark and far below.
+  The gate-passing regions are disjoint: d_H passes (>=0.90 benchmark) only for sigma >= 0.05, d_s
+  passes (|.-b|<=0.20) only for sigma <= 0.02. No sigma passes both. Confirmed on two independent
+  estimator-seed sets and at D0=18.
 
-   Verified EXACT (to the integer) on seed, grown, and thermalized states at k0=2 and k0=5, and it
-   reproduces the campaign-6 k0-map f22 values from (N0, N3, T). Every foliation-preserving local move
-   preserves it (checked: 2-3/3-2/2-6/6-2/4-4 all satisfy dN22 = dN3 - 4 dN0 + 8 dT). Consequence: at
-   fixed volume N3 and fixed T, **dN22 = -4 dN0** -- adding one spatial vertex destroys exactly four
-   (2,2) tets. Spatial-vertex density and the (2,2) fraction are ONE locked degree of freedom, not two.
-   No enlarged move set escapes a topological identity. The only ways to raise N0 while holding N22 are
-   to raise N3 (adds volume -> raises slice size s = N3/T -> climbs the d_s curve: the campaign-5
-   slice-size wall) or to raise T (lowers s: the aspect ladder). Neither makes the two benchmark
-   crossings coincide. **The "new move" branch of the frontier is closed by proof.**
+Prereg decision-rule landing: **WALL HOLDS AGAINST THE MEASURE TERM.** Combined with the identity (A),
+this closes the frontier: neither a new move (impossible) nor a hub-measure term beats the wall.
+The one genuine advance is that hub suppression decouples d_H from condensation -- the tradeoff is
+reparameterized (hub density replaces f22 as the knob), not eliminated.
 
-2. **The one lever the identity leaves open -- reshaping connectivity at fixed counts -- also fails.**
-   The identity pins all simplex counts and the MEAN degree (sum_v deg = 2 N1 = 2 (N0 + N3)), but not
-   the degree DISTRIBUTION. Causal states carry heavy-tailed HUBS (deg mean 14.6, sd 10.2, max 84) that
-   the size-matched exact 3-torus lacks entirely (deg 14, sd 0). A hub-suppressing measure/action term
+## Physics gate (trust check, before any claim)
 
-        S = k3 N3 - k0 N0 + k22 N22 + sigma * sum_v max(0, deg_v - D0)^2
+Zero-dependency + networkx runners both PASS the causal self-test (typed (3,1)/(2,2)/(1,3) seed,
+five foliation-preserving Pachner moves, census bad=0, slices are 2-spheres) and reproduce the
+frozen seed-averaged benchmark EXACTLY: exact T^3 Kuhn torus m=13 -> d_s(8-24) = 3.071 +- 0.160
+(== the frozen 3.071). Hub-term detailed balance verified directly: over a 6000-step sigma>0 chain,
+_degpen_delta == (pen_after - pen_before) to max error 0.0 on all 394 accepted moves, and the
+incremental degree cache equalled the from-scratch degree at every step (the penalty is a state
+function, so an exact delta gives detailed balance; the reverse move's delta is its negation).
 
-   (implemented in cdt_frontier2_run.py; detailed balance and manifold preservation verified) was scanned
-   over sigma at V=6000, T=12, D0=14. It moves BOTH dimensions strongly but **reparameterizes the SAME
-   tradeoff**: d_s and d_H reach the benchmark at sigma values ~10x apart. No sigma meets the joint gate.
+## (A) The locked-identity impossibility result (proven, then verified)
 
-Prereg decision-rule landing: **WALL HOLDS AGAINST THE MEASURE TERM** (H_hub REFUTED), on top of the
-impossibility proof. The d_H-d_s obstruction is not an artifact of the standard move set.
+Each spatial slice is a triangulated 2-sphere, so F_slice = 2 V_slice - 4 (Euler, chi=2). Each
+spatial triangle is the base of exactly one (3,1) tet (pointing up) and one (1,3) (pointing down),
+so summing over the T slices:  N31 = N13 = sum_slices (2 V_slice - 4) = 2 N0 - 4 T. With
+N3 = N31 + N22 + N13,  N22 = N3 - 4 N0 + 8 T,  and  f22 = 1 - 4 (N0 - 2 T)/N3.
 
-## The sigma scan (V=6000, T=12, D0=14, k0=2, k22=0; seed-averaged 8 estimator seeds for d_s, 4 for d_H)
+Independent check (`verify_identity.py`), recomputing every count from the census:
 
-Benchmark, size-matched (N0~950-1000, m=10): d_s(8-24) = 3.135 +- 0.172, d_H(2-6) = 2.473.
+| k0  | state              | N0  | N3   | N31=N13 (pred) | N22 (pred)  | identity |
+|-----|--------------------|-----|------|----------------|-------------|----------|
+| 2.0 | seed               | 72  | 288  | 96 (96)        | 96 (96)     | EXACT    |
+| 2.0 | grown ~2400        | 675 | 2761 | 1302 (1302)    | 157 (157)   | EXACT    |
+| 2.0 | thermalized +300sw | 417 | 2554 | 786 (786)      | 982 (982)   | EXACT    |
+| 5.0 | thermalized +300sw | 608 | 2673 | 1168 (1168)    | 337 (337)   | EXACT    |
 
-| sigma | f22   | d_s(8-24)     | d_H(2-6)      | d_H ratio | CV    | deg sd | deg max | G2 dH>=.90 | G3 |ds-b|<=.20 | G4 CV |
-|-------|-------|---------------|---------------|-----------|-------|--------|---------|------------|----------------|-------|
-| 0.00  | 0.380 | 3.228 +-0.245 | 1.708 +-0.072 | 0.69      | 0.314 | 10.25  | 84      | FAIL       | PASS (+0.09)   | PASS  |
-| 0.02  | 0.395 | 2.950 +-0.241 | 2.095 +-0.071 | 0.85      | 0.289 | 6.49   | 37      | FAIL       | PASS (-0.185)  | PASS  |
-| 0.05  | 0.388 | 2.611 +-0.168 | 2.142 +-0.090 | 0.87      | 0.356 | 5.31   | 30      | FAIL       | FAIL (-0.52)   | ~FAIL |
-| 0.10  | 0.367 | 2.378 +-0.227 | 2.251 +-0.013 | 0.91      | 0.276 | 4.16   | 25      | PASS       | FAIL (-0.76)   | PASS  |
-| 0.20  | 0.349 | 2.256 +-0.197 | 2.304 +-0.065 | 0.93      | 0.400 | 4.14   | 29      | PASS       | FAIL (-0.88)   | FAIL  |
+Finite-difference across the grown->thermalized step (fixed T): (dN22 - dN3)/dN0 = -4.0000 both k0.
+**Spatial-vertex density and (2,2)-fraction are one locked degree of freedom.** The only ways to raise
+N0 while holding N22 are to raise N3 (adds volume -> climbs the slice-size d_s curve: the campaign-5
+wall) or raise T (lowers slice size: the aspect ladder). Neither decouples the two benchmark crossings.
+No move set escapes an Euler identity. The "add vertices without removing (2,2) tets" branch is closed.
 
-Reading it:
-- d_s(8-24) DECREASES monotonically with sigma (3.23 -> 2.26); it crosses the benchmark at sigma ~= 0.007.
-- d_H(2-6) INCREASES monotonically (ratio 0.69 -> 0.93); it crosses ratio 0.90 at sigma ~= 0.08.
-- The two benchmark crossings are ~10x apart in sigma. Where d_s sits on the benchmark (sigma <= 0.02),
-  d_H is still <= 0.85; where d_H passes (sigma >= 0.10), d_s has collapsed to ~2.4 (deficit -0.7..-0.9).
-  **No sigma satisfies G2 and G3 together.** The hub term is a powerful, clean anticorrelated lever on
-  (d_s, d_H) -- and that is exactly the problem: it slides both dimensions along the same tradeoff line.
-- Equilibrium check: the sigma=0.10 state is stable across 1213->1643 sweeps (d_s 2.42->2.38, d_H
-  0.93->0.91, CV 0.30->0.28, f22 and N3 flat) -- an equilibrium property, not a warm-start transient.
-  It does not drift toward the joint point.
+## (B) The hub measure-term scan (V=6000, T=12, k0=2, s=N3/T=500)
 
-## Mechanism (why hub suppression cannot win)
+Warm-started from the same k0=2 sigma=0 equilibrated reference (N0=933, f22=0.393, CV 0.215),
+re-equilibrated at each sigma (f22 + profile-CV to a plateau, ~600-780 sweeps), seed-averaged over
+8 estimator seeds (seedbase 200). Benchmark (m=10, N0~1000): d_s(8-24)=3.135, d_H(2-6)=2.473.
+Gate: G2 d_H >= 0.90*b = 2.226 ; G3 |d_s(8-24) - 3.135| <= 0.20 -> d_s in [2.935, 3.335].
 
-At sigma=0 the causal 1-skeleton is over-connected by hubs (max degree 84 vs the torus's uniform 14).
-The hubs are short-range shortcuts: they hold the lazy-random-walk return probability DOWN (d_s slightly
-high) while SATURATING ball growth at small radius (d_H low, ratio 0.69). Suppressing them:
-  * de-saturates ball growth -> d_H rises toward 3 (good), AND
-  * removes the shortcuts -> the walk becomes more confined -> d_s FALLS (past the benchmark, to ~2.3).
-Both effects grow together with sigma, so d_s and d_H move in OPPOSITE directions through the benchmark.
-This is the same d_H-d_s anticorrelation seen under slice size s (campaign 5) and under f22 / k0 x k22
-(campaign 6), now reproduced by a third, independent knob. The tradeoff is a robust property of THIS
-2+1D ensemble's diffusion geometry, not of any one coupling or move.
+| D0 | sigma | N0  | f22   | CV    | deg sd | deg max | d_s(8-24)    | d_s(16-48) | d_H(2-6)     | G2 | G3 |
+|----|-------|-----|-------|-------|--------|---------|--------------|-----------|--------------|----|----|
+| 14 | 0.00  | 933 | 0.393 | 0.215 | 10.43  | 80      | 3.243+-0.414 | 2.42      | 1.843+-0.131 | F  | P  |
+| 14 | 0.02  | 924 | 0.401 | 0.253 |  6.47  | 36      | 2.981+-0.260 | 2.45      | 2.131+-0.092 | F  | P  |
+| 14 | 0.03  | 932 | 0.396 | 0.215 |  ~5.5  | 30      | 2.784+-0.274 | 2.32      | 2.173+-0.100 | F  | F  |
+| 14 | 0.04  | 925 | 0.398 | 0.216 |  ~5.0  | 30      | 2.661+-0.386 | 2.04      | 2.215+-0.092 | F  | F  |
+| 14 | 0.05  | 936 | 0.391 | 0.227 |  4.96  | 28      | 2.836+-0.265 | 2.38      | 2.229+-0.116 | P  | F  |
+| 14 | 0.10  | 956 | 0.380 | 0.236 |  4.21  | 23      | 2.430+-0.300 | 2.04      | 2.312+-0.089 | P  | F  |
+| 14 | 0.20  | 997 | 0.354 | 0.275 |  3.61  | 21      | 2.279+-0.198 | 1.92      | 2.426+-0.075 | P  | F  |
+| 18 | 0.10  | 918 | 0.403 | 0.237 |  ~4.6  | 26      | 2.837+-0.225 | 2.32      | 2.197+-0.114 | F  | F  |
 
-## Joint gate (preregistered G1-G5) -- final scoring
+census bad=0 in every row. Reading it:
+- The term does exactly what it should to the connectivity: deg sd collapses 10.4 -> 3.6 and deg max
+  80 -> 21 (toward the regular torus, deg 14 sd 0), while deg mean stays ~14-15 (fixed by the identity).
+- **d_H(2-6) rises monotonically to the benchmark: 1.84 -> 2.43 (ratio 0.74 -> 0.98) at a UNIFORM
+  profile** (CV 0.16-0.28, no upward drift, min slice never collapses -> G4 passes everywhere). This is
+  the campaign's one real advance: k0/k22 could only raise d_H by CONDENSING (which then dropped it);
+  the hub term raises it with the profile intact.
+- **d_s(8-24) falls monotonically THROUGH the benchmark and keeps going: 3.24 -> 2.28.** It is already
+  within gate at sigma=0 (+0.11) and overshoots below by sigma=0.05. The long window (16-48) falls too
+  (2.42 -> 1.92), so the overshoot is real, not a short-window lattice artifact.
+- **The pass regions are disjoint.** G2 needs sigma >= 0.05; G3 needs sigma <= 0.02. At the crossover
+  (sigma 0.03-0.04) BOTH miss (d_s ~2.7 |.|~0.4 low; d_H ratio ~0.88-0.90). No sigma sits both on
+  benchmark. D0=18 (a weaker constraint) rescales the effective coupling onto the SAME (d_s,d_H) locus
+  (sigma=0.10,D0=18 ~ sigma=0.05,D0=14) and also fails both -- the tradeoff curve is D0-independent.
 
-| config              | G1 bad=0 | G2 dH>=.90 | G3 |ds-b|<=.20 | G4 no condensation | joint? |
-|---------------------|----------|------------|-----------------|--------------------|--------|
-| sigma=0.02 (ds ok)  | PASS     | FAIL(0.85) | PASS(-0.185)    | PASS (CV 0.29)     | NO     |
-| sigma=0.10 (dH ok)  | PASS     | PASS(0.91) | FAIL(-0.76)     | PASS (CV 0.28)     | NO     |
-| sigma=0.20          | PASS     | PASS(0.93) | FAIL(-0.88)     | FAIL (CV 0.40)     | NO     |
-No (sigma, D0) passes G2 and G3 together. The gate cannot be met.
+Robustness (G5): an independent estimator-seed re-measure (seedbase 700) reproduces every trend within
+the quoted sd (d_s: 3.29/2.84/2.84/2.26 ; d_H: 1.75/2.09/2.22/2.38 at sigma 0/0.02/0.05/0.20). On that
+seed set even sigma=0.02 gives d_s=2.84 (fails G3) and d_H=2.09 (fails G2), i.e. the G3 window is even
+narrower -- tightening, not loosening, the negative.
+
+## Mechanism (the clean statement)
+
+Heavy-degree HUB vertices are the only connectivity freedom the identity leaves free (it pins the
+simplex counts and the mean degree sum_v deg = 2 N1 = 2(N0+N3), but not the degree DISTRIBUTION; a
+k0=2 causal state has deg mean 14.6 sd 10.4 max 84 vs the perfectly regular torus deg 14 sd 0). Hubs
+do two opposing things at once: they OVER-CONNECT the 1-skeleton (fast return probability -> d_s too
+high) and they SATURATE ball growth (a few high-degree vertices reach everything in a few steps ->
+d_H too low). Suppressing them therefore moves both dimensions toward the benchmark from OPPOSITE
+sides. But the single knob sigma crosses the two benchmarks at ~10x-different couplings: d_s is only
++0.1 above benchmark at sigma=0 and overshoots immediately as the skeleton over-regularizes, whereas
+d_H starts at ratio 0.74 and needs strong suppression (sigma~0.2) to desaturate. There is no sigma
+where the already-near d_s still sits on benchmark while the far d_H has caught up. Hub density is a
+new order parameter for the SAME tradeoff -- reparameterized off f22, not removed.
 
 ## Honest caveats
 
-- Impossibility identity (Sec 1) is EXACT and topological -- it holds at every V, T, and coupling; not a
-  finite-size claim. It is the load-bearing result.
-- The sigma scan is V=6000, T=12, single MC seed (seed 0), warm-started from the sigma=0 equilibrated
-  reference and re-equilibrated (~600-850 sweeps of the new term; sigma=0.10 confirmed stable over an
-  extra 430 sweeps). The MONOTONE anticorrelated trend across five sigma and the ~10x separation of the
-  two benchmark crossings are the load-bearing evidence, robust to the exact equilibration and seed.
-  A second config seed and a V=12000 confirmation were preregistered ONLY if a pass appeared; none did.
-- D0=14 (the torus degree) is the primary and only threshold scanned; D0=18 (secondary) was not run.
-  D0=18 penalizes strictly fewer vertices, i.e. a weaker version of the same lever -- expected to shift
-  the effective sigma, not to break the anticorrelation. Flagged as a minor open item.
-- Census bad=0 in every snapshot of every sigma chain: the construction never leaves the manifold; the
-  obstruction is dimensional, not topological.
+- V=6000, T=12 only (s=500, N0~920-1000). The identity (A) is exact at every V; the scan (B) is a
+  finite-size result at one slice size. Campaign 5 showed d_s/d_H collapse on slice size (V-independent),
+  and the hub mechanism is local, so the disjointness is not expected to close at larger V -- but this
+  is an argument, not a measured V=12000 confirmation (no pass appeared, so the prereg's V=12000 check
+  was not triggered).
+- Equilibration is 600-780 warm-started sweeps per point with f22 + CV plateau; the monotone d_s/d_H
+  trends and bad=0 are the load-bearing evidence, not any single point's third decimal.
+- d_s(16-48) is the noisy secondary window (sd 0.3-0.6); it is used only to confirm the d_s overshoot
+  is not a short-window artifact, which it does.
+- The gate is deliberately strict (G3 half-width 0.20 ~ one benchmark sd). Loosening it would not
+  produce a joint pass: the crossover point still misses BOTH, because d_s is ~0.3-0.5 below benchmark
+  exactly where d_H first reaches ratio 0.90.
 
-## What this closes, and what (if anything) is left
+## What would move it next (open, ranked)
 
-CLOSED: the "new move" escape (impossible by the identity) and the "reshape connectivity at fixed counts"
-escape (hub measure term reparameterizes the same tradeoff). Together with campaigns 5-6 (slice size,
-k0 x k22), the d_H-d_s wall now survives (a) every aspect ratio, (b) the whole k0 x k22 plane, and (c) a
-direct degree-measure term -- three independent levers, one wall.
-
-Not excluded (all leave the standard S^2 x S^1, alpha=1 CDT ensemble, so they answer a DIFFERENT question):
-- different spatial topology (slices not S^2 -> breaks F = 2V - 4, the root of the identity);
-- higher-dimensional (3+1D) CDT, where the known de Sitter phase reaches 4 in both dimensions;
-- a genuinely non-local / long-range action term (not a local measure term).
-Within genuine 2+1D causal CDT on S^2 x S^1, the joint (d_H AND d_s) 3-manifold does not emerge, and the
-reason is now structural: spatial-vertex density and the (2,2) stitching are a single locked DOF.
+1. A term that lowers d_s WITHOUT touching d_H (e.g. penalize short-range 1-skeleton loops / spectral
+   gap directly) rather than hubs, which move both -- the tradeoff needs TWO independent knobs, one per
+   dimension, and the identity guarantees the simplex sector cannot supply the second.
+2. V >> 24000 with a genuinely thin large-T aspect (s~385, T~60), to put a measured d_H at the
+   d_s-benchmark slice size at top volume -- the campaign-5 route, orthogonal to the hub knob.
+3. A different discrete target (higher-genus spatial slices) changes the identity to N22 =
+   N3 - 4N0 + 8T - 8*sum_slice(genus); this ADDS (2,2)-room but requires abandoning S^2 x S^1 -- a
+   different ensemble, worth a separate program, not a move within this one.

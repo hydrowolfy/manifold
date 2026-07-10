@@ -3,3 +3,4 @@ __pycache__/
 scratch/
 *.pkl
 cdt_checkpoints.tar.gz
+*.jsonl
