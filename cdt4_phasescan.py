@@ -151,7 +151,11 @@ def run_scan(a):
         tag="pt_T%d_N%d_k%s_D%s"%(a.T,a.N4t,k0,D)
         ckpt=os.path.join(scr,tag+".pkl"); plog=os.path.join(scr,tag+".jsonl")
         if os.path.exists(ckpt):
-            st,rng,meta=SC.load_ckpt(ckpt); hist=meta.get('hist',[])
+            try:
+                st,rng,meta=SC.load_ckpt(ckpt); _=st.N4; hist=meta.get('hist',[])
+            except Exception as e:
+                with open(startlog,"a") as f: f.write("WARN point ckpt %s unreadable (%s) -> restart this point from base\n"%(tag,type(e).__name__))
+                st,rng,meta=SC.load_ckpt(base); meta=dict(sweeps_done=0,k0=k0,D=D,prov_done=[]); hist=[]
         else:
             st,rng,meta=SC.load_ckpt(base); meta=dict(sweeps_done=0,k0=k0,D=D,prov_done=[]); hist=[]
         p=dict(k0=k0,D=D,k4=a.k4,eps=a.eps,N4t=a.N4t); sl=a.sweep_len or a.N4t
