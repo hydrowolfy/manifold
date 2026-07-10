@@ -180,7 +180,7 @@ def run_scan(a):
             if meta['sweeps_done']>=a.min_sweeps and len(hist)>=a.win:
                 w=hist[-a.win:]
                 if (drift([h[0] for h in w])<0.05 and drift([h[1] for h in w])<0.05
-                        and drift([h[2] for h in w])<0.05):
+                        and (drift([h[2] for h in w])<0.05 or sum(x[2] for x in w)/len(w)<0.05)):  # cv-drift gate exempt for uniform (cv<0.05) states (PREREG Sec6 deviation, logged)
                     plateaued=True; break
         SC.save_ckpt(st,rng,meta,ckpt)
         emit(results,prog,a,st,meta,k0,D,plateaued,'measured')
