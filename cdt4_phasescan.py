@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """
-cdt4_phasescan.py -- STAGE 3 PART D: coarse (kappa0, Delta) phase-diagram scan for 3+1D
-causal CDT. Reuses the VALIDATED cdt4_prod.py move set + cdt4_scan.py Metropolis engine
-VERBATIM (imported, not reimplemented). Adds ONLY the preregistered order parameters of
-PREREG_PHASE_SCAN_CDT_4D.md:
+cdt4_phasescan.py -- STAGE 3 PART D/E: (kappa0, Delta) phase-diagram scan for 3+1D causal CDT.
+Reuses the VALIDATED cdt4_prod.py move set + cdt4_scan.py Metropolis engine VERBATIM (imported,
+not reimplemented). Adds ONLY the preregistered order parameters of PREREG_PHASE_SCAN_CDT_4D.md:
   OP1 profile shape : cv, r_max, r_min, n_empty, top_frac, cos3_r2, cos3_amp_frac, peaks
   OP2 hubs          : f_hub(deg>40), f_hub30, deg_mean/sd/max
   OP3 d_H(2-6) ratio r_H to matched-N0 flat-T^4 benchmark (linear interp m6<->m8)
   OP4 d_s flow      : ds_uv=d_s(4-12), ds_ir=d_s(8-24), delta_ds=uv-ir, delta_ds_rel vs
                       the measured flat-T^4 reference (+0.995 at N0=1296; UV-bias baseline)
   OP5               : f_tl=N32/N4, rho0=N0/N4
-Thermalizes each (k0,D) to a plateau (drift test on N0,f_tl,cv over the last `win` sweeps,
-after `min_sweeps`), checkpoints per point (resumable), and streams PROVISIONAL measures at
-milestones for early signal. Writes results.jsonl + progress.txt + heartbeat.txt + START.log.
-Stdlib only (no networkx). One uncontended run on the uncapped box; re-run to resume/extend.
+Thermalizes each (k0,D) to a plateau, checkpoints per point (resumable), streams PROVISIONAL
+measures at milestones. Writes results.jsonl + progress.txt + heartbeat.txt + START.log.
+Stdlib only. See LESSONS 53 for the long-run engineering traps (checkpoint I/O, hang watchdogs).
 """
 import sys, os, math, json, time, random, argparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -37,8 +35,7 @@ def bench_interp(N0):
             BENCH[lo][1]+f*(BENCH[hi][1]-BENCH[lo][1]), False)
 
 def cos3_fit(prof):
-    """Fit N(t) ~ A*cos^3((t-t0)*pi/W)+c (A>0) over periodic t by t0,W grid search.
-    Returns (R2, params=(A,c,t0,W))."""
+    """Fit N(t) ~ A*cos^3((t-t0)*pi/W)+c (A>0) over periodic t by t0,W grid search."""
     T=len(prof); mean=sum(prof)/T if T else 0.0
     sstot=sum((x-mean)**2 for x in prof) or 1e-9
     best=(-1e9,None)
@@ -101,6 +98,18 @@ def drift(ys):
     slope=sum((xs[i]-mx)*(ys[i]-my) for i in range(n))/den
     return abs(slope*n/(my if abs(my)>1e-9 else 1e-9))
 
+def safe_save(st,rng,meta,ckpt,startlog):
+    # A transient mount rename failure in save_ckpt must NOT crash the whole run (LESSONS 53a:
+    # drvfs os.replace can raise FileNotFoundError). Skip this checkpoint and continue.
+    # NB: this MUST call SC.save_ckpt, not itself -- an earlier replace-all made it recurse, which
+    # meant NO checkpoints were written at all (the RecursionError was swallowed as a WARN).
+    try:
+        SC.save_ckpt(st,rng,meta,ckpt)
+    except Exception as e:
+        try:
+            with open(startlog,"a") as f: f.write("WARN save_ckpt failed (%s) at %s -- skipped, continuing\n"%(type(e).__name__,ckpt))
+        except Exception: pass
+
 def emit(results, prog, a, st, meta, k0, D, plateaued, status):
     m=measure_ext(st,seeds=a.meas_seeds,seedbase=1)
     rem=None
@@ -129,13 +138,15 @@ def run_scan(a):
     milestones=set(int(x) for x in a.provisional_at.split(",") if x.strip())
     with open(os.path.join(scr,"RUNNER.pid"),"w") as f: f.write(str(os.getpid()))
     with open(startlog,"a") as f:
-        f.write("START %s pid=%d T=%d N4t=%d eps=%s min=%d win=%d cap=%d order=%s\n"%(
+        f.write("START %s pid=%d T=%d N4t=%d eps=%s min=%d win=%d cap=%d\n"%(
             time.strftime('%Y-%m-%d %H:%M:%S'),os.getpid(),a.T,a.N4t,a.eps,
-            a.min_sweeps,a.win,a.cap_sweeps,FROZEN_ORDER))
-    base=os.path.join(scr,"base_T%d_N%d.pkl"%(a.T,a.N4t))
+            a.min_sweeps,a.win,a.cap_sweeps))
+    ckptdir = a.ckpt_dir or scr
+    os.makedirs(ckptdir, exist_ok=True)
+    base=os.path.join(ckptdir,"base_T%d_N%d.pkl"%(a.T,a.N4t))
     if not os.path.exists(base):
         rng=random.Random(a.seed); st0=C.seed_flat(a.T)
-        SC.grow_to(st0,int(a.N4t*a.overgrow),rng)   # grow ABOVE target -> irregularize + approach from above
+        SC.grow_to(st0,int(a.N4t*a.overgrow),rng)   # grow ABOVE target -> irregularize (RUN_LOG 1-2)
         SC.save_ckpt(st0,rng,dict(kind="base",sweeps_done=0),base)
         with open(startlog,"a") as f:
             f.write("BASE grown N4=%d N0=%d census=%s\n"%(st0.N4,st0.N0,st0.census()))
@@ -145,20 +156,36 @@ def run_scan(a):
             try: r=json.loads(line)
             except Exception: continue
             if r.get('status')=='measured': done.add((r['k0'],r['D']))
-    order=FROZEN_ORDER[:a.maxpoints] if a.maxpoints else FROZEN_ORDER
+    skip=set()
+    for s in (a.skip or "").split(","):
+        s=s.strip()
+        if s:
+            kk,dd=s.split(":"); skip.add((float(kk),float(dd)))
+    if skip:
+        with open(startlog,"a") as f: f.write("SKIP (logged deviation): %s\n"%sorted(skip))
+    if a.grid:
+        order=[]
+        for s in a.grid.split(","):
+            kk,dd=s.strip().split(":"); order.append((float(kk),float(dd)))
+        with open(startlog,"a") as f: f.write("CUSTOM GRID: %s\n"%order)
+    else:
+        order=FROZEN_ORDER[:a.maxpoints] if a.maxpoints else FROZEN_ORDER
     for (k0,D) in order:
         if (k0,D) in done: continue
+        if (k0,D) in skip:
+            with open(startlog,"a") as f: f.write("SKIPPING point k0=%s D=%s (declared intractable)\n"%(k0,D))
+            continue
         tag="pt_T%d_N%d_k%s_D%s"%(a.T,a.N4t,k0,D)
-        ckpt=os.path.join(scr,tag+".pkl"); plog=os.path.join(scr,tag+".jsonl")
+        ckpt=os.path.join(ckptdir,tag+".pkl"); plog=os.path.join(scr,tag+".jsonl")
         if os.path.exists(ckpt):
             try:
                 st,rng,meta=SC.load_ckpt(ckpt); _=st.N4; hist=meta.get('hist',[])
             except Exception as e:
-                with open(startlog,"a") as f: f.write("WARN point ckpt %s unreadable (%s) -> restart this point from base\n"%(tag,type(e).__name__))
+                with open(startlog,"a") as f: f.write("WARN point ckpt %s unreadable (%s) -> restart from base\n"%(tag,type(e).__name__))
                 st,rng,meta=SC.load_ckpt(base); meta=dict(sweeps_done=0,k0=k0,D=D,prov_done=[]); hist=[]
         else:
             st,rng,meta=SC.load_ckpt(base); meta=dict(sweeps_done=0,k0=k0,D=D,prov_done=[]); hist=[]
-        p=dict(k0=k0,D=D,k4=a.k4,eps=a.eps,N4t=a.N4t); sl=a.sweep_len or a.N4t
+        p=dict(k0=k0,D=D,k4=a.k4,eps=a.eps,N4t=a.N4t,n0max=a.n0max,eps0=a.eps0); sl=a.sweep_len or a.N4t
         prov_done=set(meta.get('prov_done',[])); plateaued=False
         while meta['sweeps_done']<a.cap_sweeps:
             SC.sweep(st,p,rng,sl); meta['sweeps_done']+=1
@@ -172,17 +199,19 @@ def run_scan(a):
             with open(plog,"a") as f:
                 f.write(json.dumps(dict(sweep=meta['sweeps_done'],N0=st.N0,N4=st.N4,
                         f_tl=round(f_tl,4),cv=round(cv,4),census_bad=b))+"\n")
-            if meta['sweeps_done']%a.ckpt_every==0: SC.save_ckpt(st,rng,meta,ckpt)
+            if meta['sweeps_done']%a.ckpt_every==0: safe_save(st,rng,meta,ckpt,startlog)
             if meta['sweeps_done'] in milestones and meta['sweeps_done'] not in prov_done:
                 emit(results,prog,a,st,meta,k0,D,False,'provisional')
                 prov_done.add(meta['sweeps_done']); meta['prov_done']=sorted(prov_done)
-                SC.save_ckpt(st,rng,meta,ckpt)
+                safe_save(st,rng,meta,ckpt,startlog)
             if meta['sweeps_done']>=a.min_sweeps and len(hist)>=a.win:
                 w=hist[-a.win:]
+                # cv-drift gate exempt for already-uniform (mean cv<0.05) states -- LESSONS 52,
+                # logged deviation from PREREG Sec 6. Convergence is governed by N0 and f_tl.
                 if (drift([h[0] for h in w])<0.05 and drift([h[1] for h in w])<0.05
-                        and (drift([h[2] for h in w])<0.05 or sum(x[2] for x in w)/len(w)<0.05)):  # cv-drift gate exempt for uniform (cv<0.05) states (PREREG Sec6 deviation, logged)
+                        and (drift([h[2] for h in w])<0.05 or sum(x[2] for x in w)/len(w)<0.05)):
                     plateaued=True; break
-        SC.save_ckpt(st,rng,meta,ckpt)
+        safe_save(st,rng,meta,ckpt,startlog)
         emit(results,prog,a,st,meta,k0,D,plateaued,'measured')
         with open(hb,"w") as f: f.write("DONE pt k0=%s D=%s sweep %d plateau=%s\n"%(k0,D,meta['sweeps_done'],plateaued))
     with open(startlog,"a") as f: f.write("SCAN COMPLETE %s\n"%time.strftime('%Y-%m-%d %H:%M:%S'))
@@ -200,13 +229,18 @@ def main():
     ap.add_argument("--T",type=int,default=6); ap.add_argument("--N4t",type=int,default=42000)
     ap.add_argument("--eps",type=float,default=0.002); ap.add_argument("--k4",type=float,default=0.0)
     ap.add_argument("--overgrow",type=float,default=1.15); ap.add_argument("--sweep-len",type=int,default=0)
-    ap.add_argument("--min-sweeps",type=int,default=600)   # PREREG Sec 6: >=600 sweeps past grow
-    ap.add_argument("--win",type=int,default=300)          # PREREG Sec 6: drift over last 300 sweeps
+    ap.add_argument("--min-sweeps",type=int,default=600)
+    ap.add_argument("--win",type=int,default=300)
     ap.add_argument("--cap-sweeps",type=int,default=1500)
     ap.add_argument("--provisional-at",type=str,default="150,300,600")
     ap.add_argument("--ckpt-every",type=int,default=5); ap.add_argument("--meas-seeds",type=int,default=8)
     ap.add_argument("--maxpoints",type=int,default=0); ap.add_argument("--seed",type=int,default=0)
     ap.add_argument("--scratch",type=str,default="out"); ap.add_argument("--bench-m",type=int,default=6)
+    ap.add_argument("--ckpt-dir",type=str,default="")   # keep multi-GB ckpts off the slow/full mount
+    ap.add_argument("--skip",type=str,default="")       # e.g. "5.0:0.0" -- excluded, logged
+    ap.add_argument("--grid",type=str,default="")       # e.g. "7:0.6,9:0.6,12:0.6" (Part E row)
+    ap.add_argument("--n0max",type=int,default=0)       # soft N0 ceiling (0=off); DB-verified
+    ap.add_argument("--eps0",type=float,default=0.01)   # ceiling stiffness
     a=ap.parse_args()
     if a.bench: return bench_mode(a)
     if a.selftest:
