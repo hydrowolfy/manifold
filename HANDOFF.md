@@ -119,3 +119,36 @@ STANDALONE there (DB check PASS, selftest PASS). NEXT SESSION: get desktop acces
 Claude session), double-click run_cdt4_scan.bat, watch scratch/results.jsonl + progress.txt; run at
 N4t large enough that eq. N0>1300 (T>=6) and thermalize each point to an N0/f_tl/CV plateau; score
 vs the gate. Expected (Part A + AJL): phase C ~ (2.2,0.6) passes = WALL BROKEN DYNAMICALLY.
+
+
+## 10. STAGE 3 PART D (coarse (kappa0,Delta) phase scan) -- RESOLVED 2026-07-12: NO PHASE C ACCESSIBLE
+
+PREREG_PHASE_SCAN_CDT_4D.md (frozen BEFORE measuring) -> PHASE_SCAN_CDT_4D.md (verdict).
+Ran the full coarse grid kappa0{1.0,2.2,3.5,5.0} x Delta{0.0,0.2,0.4,0.6} at T=6, N4~42000,
+8 estimator seeds, census bad=0 throughout. 12/16 points measured (the rest are interior fill-ins).
+
+VERDICT: **NO phase C anywhere -- and no A or B either.** Every point is the SAME hub-dominated,
+extended, structureless uniform tube (f_hub 0.28-0.47 vs a <=0.08 gate; r_H 0.59-0.72 vs a >=0.90
+gate; top_frac ~0.17 everywhere; cos^3 amplitude 0.02-0.12 = a ripple, not a blob). The A/B/C phase
+structure DOES NOT RESOLVE at N4~4e4. **(2.2,0.6) was therefore NOT "the wrong phase"** -- it is
+typical of the whole plane, not an outlier; the earlier N4=45000 failure was generic, not a bad
+coupling choice.
+
+THE POSITIVE DIRECTION (the actionable result): **kappa0 is the de Sitter direction, and the frozen
+grid stopped exactly at the edge where the physics turns over.** Monotonic in kappa0: hubs
+0.47->0.28, d_s(8-24) 3.9->5.2, and the benchmark-relative d_s scale-flow DELTA_ds_rel falls
++0.66 -> +0.07 and CROSSES ZERO into the de Sitter direction at kappa0=5 (-0.06 at (5.0,0.2),
+-0.46 at (5.0,0.0)). Delta, by contrast, is INERT (it tunes f_tl as designed, but moves no other
+order parameter) -- so the two-DOF unlock is real but not by itself sufficient (LESSONS 48).
+
+NEXT (ranked):
+ 1. EXTEND kappa0 PAST 5 at Delta=0.6 (kappa0 = 7, 9, 12). Highest-information, cheap. But high
+    kappa0 drives an N0 RUNAWAY ((5.0,0.0): N0->2125, never settles, 1.3GB checkpoints, OOM) --
+    add a vertex-density cap or a tighter volume term FIRST (LESSONS 51).
+ 2. RAISE N4 toward 1e5 (literature de Sitter is at N4~1e5-1e6; hub domination is the generic
+    small-volume behaviour).
+ 3. Only if 1 and 2 both fail should the implementation itself be suspected.
+
+Code: cdt4_phasescan.py (adds the preregistered order parameters + --ckpt-dir/--ckpt-every/--skip),
+analyze_phasescan.py (the frozen decision tree -> phase map), supervise.sh (hang-watchdog supervisor).
+Run engineering is brutal at this scale -- read LESSONS 53 (a)-(g) BEFORE launching another long run.
